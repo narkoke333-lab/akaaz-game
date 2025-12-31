@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title> عُكاظ | النسخة الاحترافية</title>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@700&family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gold: #c29547; --coffee-dark: #3e2723; --clay-warm: #d84315;
+            --ivory-bg: #fdf5e6; --sand-soft: #f4ece1; --card-bg: rgba(255, 255, 255, 0.9);
+            --text-main: #3e2723; --shadow: rgba(62, 39, 35, 0.15); --sidebar-bg: rgba(194, 149, 71, 0.1);
+        }
+        .dark-theme {
+            --primary-gold: #d4af37; --coffee-dark: #f4ece1; --clay-warm: #ff5722;
+            --ivory-bg: #121212; --sand-soft: #1a1a1a; --card-bg: rgba(30, 30, 30, 0.95);
+            --text-main: #e0e0e0; --shadow: rgba(0, 0, 0, 0.5); --sidebar-bg: rgba(212, 175, 55, 0.05);
+        }
+
+        * { box-sizing: border-box; transition: background 0.3s, color 0.3s; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; font-family: 'Cairo', sans-serif; background: var(--ivory-bg); color: var(--text-main); height: 100vh; overflow: hidden; display: flex; flex-direction: row; }
+
+        /* التجاوب مع الموبايل */
+        @media (max-width: 800px) {
+            body { flex-direction: column; }
+            .cultural-sidebar { width: 100% !important; height: auto !important; padding: 10px !important; border-left: none !important; border-bottom: 2px solid var(--primary-gold); }
+            .falling-word { font-size: 1.8rem !important; }
+            .card { padding: 20px !important; }
+            h1 { font-size: 1.8rem !important; }
+        }
+
+        .cultural-sidebar { width: 300px; background: var(--sidebar-bg); border-left: 1px solid var(--primary-gold); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px; text-align: center; z-index: 10; }
+        .quote-box { font-family: 'Amiri', serif; font-size: 1.2rem; color: var(--primary-gold); line-height: 1.6; }
+
+        .main-content { flex: 1; position: relative; display: flex; align-items: center; justify-content: center; width: 100%; }
+        .screen { position: absolute; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+        .hidden { display: none !important; }
+
+        .card { background: var(--card-bg); padding: 40px; border-radius: 25px; border: 1px solid var(--primary-gold); box-shadow: 0 10px 30px var(--shadow); text-align: center; width: 100%; max-width: 400px; }
+        h1 { font-family: 'Amiri', serif; font-size: 2.2rem; color: var(--primary-gold); margin-bottom: 15px; }
+
+        button { background: var(--primary-gold); color: white; border: none; padding: 14px; border-radius: 12px; font-size: 1rem; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px; box-shadow: 0 4px 10px var(--shadow); }
+        button:active { transform: scale(0.98); }
+        .btn-prizes { background: var(--clay-warm) !important; }
+
+        .stats-bar { position: absolute; top: 20px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; width: 100%; z-index: 20; }
+        .stat-item { background: var(--card-bg); padding: 5px 15px; border-radius: 10px; border: 1px solid var(--primary-gold); font-weight: bold; font-size: 0.85rem; }
+
+        #game-area { width: 100%; height: 60vh; position: relative; overflow: hidden; border-bottom: 2px dashed var(--primary-gold); }
+        .falling-word { position: absolute; font-family: 'Amiri', serif; font-size: 2.5rem; font-weight: bold; color: var(--clay-warm); white-space: nowrap; transition: none; }
+        
+        #word-entry { width: 90%; max-width: 300px; padding: 15px; border-radius: 15px; border: 2px solid var(--primary-gold); background: var(--card-bg); color: var(--text-main); font-size: 1.2rem; text-align: center; margin-top: 20px; }
+
+        .comp-stats { color: var(--clay-warm); font-weight: bold; margin-bottom: 10px; display: flex; justify-content: space-between; width: 100%; }
+    </style>
+</head>
+<body>
+
+    <aside class="cultural-sidebar">
+        <div class="quote-box" id="quote-text">"العلمُ صيدٌ والكتابةُ قيدُه"</div>
+        <div class="quote-author" style="margin-top:10px; font-weight:bold; color:var(--clay-warm)">— الشافعي</div>
+    </aside>
+
+    <main class="main-content">
+        <div id="auth-screen" class="screen">
+            <div class="card">
+                <h1> عُكاظ</h1>
+                <input type="text" id="login-id" placeholder="أدخل المعرّف (ID)">
+                <button onclick="login()">📜 دخول المجلس</button>
+            </div>
+        </div>
+
+        <div id="main-menu" class="screen hidden">
+            <div class="stats-bar">
+                <div class="stat-item">النقاط: <span id="m-points">0</span></div>
+                <div class="stat-item">المحاولات: <span id="m-attempts">0</span> <span id="timer-display" style="color:red; font-size:0.7rem"></span></div>
+            </div>
+            <div class="card">
+                <h1>المجلس الرئيسي</h1>
+                <button onclick="startGame(false)">🎮 لعب حر</button>
+                <button class="btn-prizes" onclick="showCompetitionMenu()">🏆 مسابقات وجوائز</button>
+                <button onclick="exchangePoints()" style="background:#4caf50">🔄 استبدال (10ن = 1 محاولة)</button>
+                <button onclick="toggleTheme()" style="background:var(--coffee-dark)">🌓 المظهر</button>
+            </div>
+        </div>
+
+        <div id="comp-menu" class="screen hidden">
+            <div class="card">
+                <h1>التحدي الكبير</h1>
+                <p>اكتب 60 كلمة صحيحة في 140 ثانية</p>
+                <p style="color:var(--clay-warm)">رسم الاشتراك: 30 نقطة</p>
+                <p style="color:green">الجائزة: 130 نقطة</p>
+                <button onclick="startGame(true)" style="background:var(--clay-warm)">🚀 ابدأ التحدي الآن</button>
+                <button onclick="showMainMenu()" style="background:#666">العودة للخلف</button>
+                <hr>
+                <p style="font-size:0.8rem">كل 10,000 نقطة تعادل 1 دولار مكافأة قريبا </p>
+            </div>
+        </div>
+
+        <div id="game-screen" class="screen hidden">
+            <div id="comp-header" class="hidden" style="width: 100%; max-width: 400px;">
+                <div class="comp-stats">
+                    <span>الوقت: <b id="comp-timer">140</b></span>
+                    <span>الكلمات: <b id="comp-count">0</b>/60</span>
+                </div>
+            </div>
+            <div id="game-area"></div>
+            <input type="text" id="word-entry" placeholder="اكتب الكلمة..." autocomplete="off">
+            <button onclick="quitGame()" style="width:auto; padding:5px 20px; background:#666; margin-top:10px;">انسحاب</button>
+        </div>
+    </main>
+
+    <script>
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxLutalsPEehqIcn7JT45pnbS8ueNz83C7EHgyy-1tC6YaAp8PwMRc1wTBjIAl81_E/exec";
+        let player = { id: '', points: 0, attempts: 0 };
+        let isCompMode = false, wordsWritten = 0, timeLeft = 70, gameActive = false, fallTimer, compTimerInterval;
+
+        const sounds = {
+            success: new Audio('https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3'),
+            fail: new Audio('https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3'),
+            click: new Audio('https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3')
+        };
+
+        function playSound(type) { sounds[type].currentTime = 0; sounds[type].play().catch(()=>{}); }
+
+        // --- الدخول ---
+        async function login() {
+            const idVal = document.getElementById('login-id').value.trim();
+            if(!idVal) return alert("أدخل المعرف");
+            try {
+                const res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({action: 'login', id: idVal}) });
+                const data = await res.json();
+                if(data.result === "found") {
+                    player.id = idVal; player.points = data.points; player.attempts = data.attempts;
+                    showMainMenu();
+                    if(player.attempts <= 0) startRegenTimer();
+                } else alert("المعرف خطأ");
+            } catch(e) { alert("خطأ اتصال"); }
+        }
+
+        // --- التنقل بين الشاشات ---
+        function showMainMenu() { hideScreens(); document.getElementById('main-menu').classList.remove('hidden'); updateUI(); }
+        function showCompetitionMenu() { hideScreens(); document.getElementById('comp-menu').classList.remove('hidden'); }
+        function hideScreens() { document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden')); }
+
+        // --- نظام اللعب ---
+        function startGame(comp) {
+            if(comp) {
+                if(player.points < 30) return alert("نقاطك لا تكفي للاشتراك (تحتاج 30 نقطة)");
+                player.points -= 30;
+                isCompMode = true; wordsWritten = 0; timeLeft = 140;
+                document.getElementById('comp-header').classList.remove('hidden');
+                startCompTimer();
+            } else {
+                if(player.attempts <= 0) return alert("لا توجد محاولات! انتظر المدد.");
+                isCompMode = false;
+                document.getElementById('comp-header').classList.add('hidden');
+            }
+            
+            playSound('click');
+            hideScreens(); document.getElementById('game-screen').classList.remove('hidden');
+            gameActive = true; spawnWord(); document.getElementById('word-entry').focus();
+            updateUI();
+        }
+
+        function spawnWord() {
+            if(!gameActive) return;
+            const words = ["نخيل", "فروسية", "أصالة", "فصاحة", "كرم", "مروءة", "بيداء", "شجاعة", "مجلس", "خيل", "سيف", "ضاد"];
+            const area = document.getElementById('game-area');
+            area.innerHTML = '';
+            const word = words[Math.floor(Math.random() * words.length)];
+            const el = document.createElement('div');
+            el.className = 'falling-word';
+            el.innerText = word;
+            area.appendChild(el);
+
+            // إصلاح مشكلة الظهور: حساب العرض لضمان البقاء داخل الشاشة
+            const wordWidth = el.offsetWidth;
+            const safeWidth = area.offsetWidth - wordWidth - 20;
+            const randomLeft = Math.max(10, Math.random() * safeWidth);
+            el.style.left = randomLeft + 'px';
+            
+            let top = -50;
+            fallTimer = setInterval(() => {
+                top += (isCompMode ? 2.5 : 1.8);
+                el.style.top = top + 'px';
+                if(top > area.offsetHeight - 50) {
+                    clearInterval(fallTimer);
+                    if(!isCompMode) { player.attempts--; playSound('fail'); save(); }
+                    if(player.attempts > 0 || isCompMode) spawnWord(); else quitGame();
+                    updateUI();
+                }
+            }, 30);
+        }
+
+        document.getElementById('word-entry').addEventListener('input', (e) => {
+            if(e.target.value.trim() === document.querySelector('.falling-word')?.innerText) {
+                clearInterval(fallTimer);
+                playSound('success');
+                e.target.value = '';
+                if(isCompMode) {
+                    wordsWritten++;
+                    document.getElementById('comp-count').innerText = wordsWritten;
+                    if(wordsWritten >= 60) winCompetition(); else spawnWord();
+                } else {
+                    player.points++;
+                    save(); updateUI(); spawnWord();
+                }
+            }
+        });
+
+        // --- أنظمة الوقت ---
+        function startCompTimer() {
+            compTimerInterval = setInterval(() => {
+                timeLeft--;
+                document.getElementById('comp-timer').innerText = timeLeft;
+                if(timeLeft <= 0) { 
+                    clearInterval(compTimerInterval); 
+                    alert("انتهى الوقت! لم تصل للهدف."); 
+                    quitGame(); 
+                }
+            }, 1000);
+        }
+
+        function winCompetition() {
+            clearInterval(compTimerInterval);
+            gameActive = false;
+            player.points += 130;
+            save();
+            alert("كفو! فزت بالتحدي وحصلت على 130 نقطة.");
+            showMainMenu();
+        }
+
+        function startRegenTimer() {
+            let rTime = 180;
+            const timerEl = document.getElementById('timer-display');
+            const interval = setInterval(() => {
+                let m = Math.floor(rTime/60), s = rTime%60;
+                timerEl.innerText = `(${m}:${s<10?'0':''}${s})`;
+                if(rTime <= 0 || player.attempts > 0) {
+                    clearInterval(interval);
+                    if(player.attempts <= 0) { player.attempts = 3; save(); }
+                    timerEl.innerText = "";
+                    updateUI();
+                }
+                rTime--;
+            }, 1000);
+        }
+
+        // --- عمليات أساسية ---
+        function exchangePoints() {
+            if(player.points >= 10) { player.points -= 10; player.attempts += 1; updateUI(); save(); }
+            else alert("نقاطك أقل من 10");
+        }
+
+        function quitGame() {
+            gameActive = false;
+            clearInterval(fallTimer);
+            clearInterval(compTimerInterval);
+            showMainMenu();
+        }
+
+        function updateUI() {
+            document.getElementById('m-points').innerText = player.points;
+            document.getElementById('m-attempts').innerText = player.attempts;
+        }
+
+        function save() {
+            if (!player.id) return;
+            new Image().src = `${SCRIPT_URL}?action=save&id=${player.id}&points=${player.points}&attempts=${player.attempts}`;
+        }
+
+        function toggleTheme() { document.body.classList.toggle('dark-theme'); }
+    </script>
+</body>
+</html>
