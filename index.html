@@ -26,18 +26,18 @@
         .hidden { display: none !important; }
         .card { background: var(--card-bg); padding: 30px; border-radius: 20px; border: 1px solid var(--primary-gold); box-shadow: 0 10px 30px var(--shadow); text-align: center; width: 100%; max-width: 380px; }
         h1 { font-family: 'Amiri', serif; font-size: 2.2rem; color: var(--primary-gold); margin: 0 0 15px 0; }
-        input { width: 100%; padding: 12px; margin: 10px 0; border: 1.5px solid var(--primary-gold); border-radius: 10px; text-align: center; font-size: 1rem; background: white; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 1.5px solid var(--primary-gold); border-radius: 10px; text-align: center; font-size: 1rem; background: white; color: #000; }
         button { background: var(--primary-gold); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; }
         button:disabled { opacity: 0.7; cursor: not-allowed; }
         .spinner { width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: #fff; animation: spin 0.8s linear infinite; display: none; }
         @keyframes spin { to { transform: rotate(360deg); } }
         .tabs { display: flex; gap: 8px; margin-bottom: 15px; }
-        .tab-btn { flex: 1; padding: 8px; border-radius: 8px; border: 1px solid var(--primary-gold); background: transparent; color: var(--primary-gold); font-size: 0.9rem; }
+        .tab-btn { flex: 1; padding: 8px; border-radius: 8px; border: 1px solid var(--primary-gold); background: transparent; color: var(--primary-gold); font-size: 0.9rem; cursor: pointer; }
         .tab-btn.active { background: var(--primary-gold); color: white; }
         .stats-bar { position: absolute; top: 15px; display: flex; gap: 10px; z-index: 20; }
         .stat-item { background: var(--card-bg); padding: 5px 12px; border-radius: 8px; border: 1px solid var(--primary-gold); font-size: 0.85rem; font-weight: bold; }
         #game-area { width: 100%; height: 65vh; position: relative; overflow: hidden; border-bottom: 2px dashed var(--primary-gold); }
-        .falling-word { position: absolute; font-family: 'Amiri', serif; font-size: 2.3rem; font-weight: bold; color: var(--clay-warm); white-space: nowrap; }
+        .falling-word { position: absolute; font-family: 'Amiri', serif; font-size: 2.3rem; font-weight: bold; color: var(--clay-warm); white-space: nowrap; text-shadow: 1px 1px 2px rgba(0,0,0,0.1); }
     </style>
 </head>
 <body>
@@ -56,7 +56,7 @@
                     <button id="t-reg" class="tab-btn" onclick="toggleAuth('reg')">تسجيل</button>
                 </div>
                 <div id="login-form">
-                    <input type="text" id="login-id" placeholder="أدخل المعرّف (ID)">
+                    <input type="text" id="login-id" placeholder="أدخل المعرّف الرقمي (ID)">
                     <button id="btn-login" onclick="login()">
                         <div class="spinner" id="spin-l"></div> <span id="txt-l">📜 دخول المجلس</span>
                     </button>
@@ -119,10 +119,17 @@
         let player = { id: '', points: 0, attempts: 0 };
         let serverOTP = "", userEmail = "", isCompMode = false, wordsWritten = 0, timeLeft = 140, gameActive = false, fallTimer, compTimerInterval;
 
+        // إصلاح روابط الصوت لتعمل بشكل مباشر
         const sounds = {
-            success: new Audio('https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3'),
-            fail: new Audio('https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3')
+            success: new Audio('https://cdn.pixabay.com/audio/2022/03/10/audio_c3527a406d.mp3'),
+            fail: new Audio('https://cdn.pixabay.com/audio/2022/03/15/audio_8233f2c5e5.mp3')
         };
+
+        // وظيفة لفك حظر الصوت في المتصفح
+        function unlockAudio() {
+            sounds.success.play().then(() => { sounds.success.pause(); sounds.success.currentTime = 0; });
+            sounds.fail.play().then(() => { sounds.fail.pause(); sounds.fail.currentTime = 0; });
+        }
 
         function toggleAuth(m) {
             document.getElementById('login-form').classList.toggle('hidden', m!=='login');
@@ -138,8 +145,9 @@
         }
 
         async function login() {
+            unlockAudio();
             const id = document.getElementById('login-id').value.trim();
-            if(!id) return alert("أدخل المعرف");
+            if(!id) return alert("أدخل المعرف الرقمي");
             setLoad('btn-login','spin-l','txt-l',true,'جاري الدخول...');
             try {
                 const res = await fetch(SCRIPT_URL, {method:'POST', body:JSON.stringify({action:'login', id:id})});
@@ -148,13 +156,13 @@
                     player = {id:id, points:d.points, attempts:d.attempts};
                     showMainMenu();
                 } else alert("المعرف غير موجود");
-            } catch(e) { alert("خطأ في الاتصال"); }
+            } catch(e) { alert("خطأ في الاتصال بالسيرفر"); }
             setLoad('btn-login','spin-l','txt-l',false,'📜 دخول المجلس');
         }
 
         async function requestOTP() {
             userEmail = document.getElementById('reg-email').value.trim();
-            if(!userEmail) return alert("أدخل البريد");
+            if(!userEmail) return alert("أدخل البريد الإلكتروني");
             setLoad('btn-otp','spin-otp','txt-otp',true,'جاري الإرسال...');
             try {
                 const res = await fetch(SCRIPT_URL, {method:'POST', body:JSON.stringify({action:'request_otp', email:userEmail})});
@@ -163,23 +171,24 @@
                     serverOTP = d.otp;
                     document.getElementById('email-step').classList.add('hidden');
                     document.getElementById('otp-step').classList.remove('hidden');
-                    alert("تم إرسال الكود لبريدك");
+                    alert("تم إرسال كود التحقق لبريدك");
                 } else alert(d.message);
             } catch(e) { alert("خطأ اتصال"); }
             setLoad('btn-otp','spin-otp','txt-otp',false,'إرسال كود التحقق');
         }
 
         async function verifyAndRegister() {
+            unlockAudio();
             if(document.getElementById('otp-input').value.trim() !== serverOTP) return alert("الكود خطأ");
             setLoad('btn-verify','spin-v','txt-v',true,'إنشاء الحساب...');
             try {
                 const res = await fetch(SCRIPT_URL, {method:'POST', body:JSON.stringify({action:'register_confirm', email:userEmail})});
                 const d = await res.json();
                 if(d.result === "success") {
-                    alert("مبروك! معرفك هو: " + d.id);
+                    alert("تم التسجيل! تم إرسال الـ ID الرقمي إلى إيميلك: " + d.id);
                     location.reload();
                 }
-            } catch(e) { alert("خطأ تسجيل"); }
+            } catch(e) { alert("خطأ في التسجيل"); }
             setLoad('btn-verify','spin-v','txt-v',false,'تأكيد وإنشاء الحساب');
         }
 
@@ -204,7 +213,7 @@
 
         function spawnWord() {
             if(!gameActive) return;
-            const words = ["نخيل", "فروسية", "أصالة", "فصاحة", "كرم", "مروءة", "بيداء", "شجاعة", "مجلس", "سيف"];
+            const words = ["نخيل", "فروسية", "أصالة", "فصاحة", "كرم", "مروءة", "بيداء", "شجاعة", "مجلس", "سيف", "خيل", "قهوة", "شعر"];
             const area = document.getElementById('game-area');
             area.innerHTML = '';
             const word = words[Math.floor(Math.random() * words.length)];
@@ -219,7 +228,11 @@
                 el.style.top = top + 'px';
                 if(top > area.offsetHeight - 50) {
                     clearInterval(fallTimer);
-                    if(!isCompMode) { player.attempts--; sounds.fail.play(); save(); }
+                    if(!isCompMode) { 
+                        player.attempts--; 
+                        sounds.fail.play().catch(()=>{}); // صوت الخسارة
+                        save(); 
+                    }
                     if(player.attempts > 0 || isCompMode) spawnWord(); else quitGame();
                     updateUI();
                 }
@@ -228,9 +241,12 @@
 
         document.getElementById('word-entry').addEventListener('input', (e) => {
             if(e.target.value.trim() === document.querySelector('.falling-word')?.innerText) {
-                clearInterval(fallTimer); sounds.success.play(); e.target.value = '';
+                clearInterval(fallTimer); 
+                sounds.success.play().catch(()=>{}); // صوت النجاح
+                e.target.value = '';
                 if(isCompMode) {
-                    wordsWritten++; document.getElementById('comp-count').innerText = wordsWritten;
+                    wordsWritten++; 
+                    document.getElementById('comp-count').innerText = wordsWritten;
                     if(wordsWritten >= 60) winComp(); else spawnWord();
                 } else {
                     player.points++; save(); updateUI(); spawnWord();
@@ -240,12 +256,21 @@
 
         function startCompTimer() {
             compTimerInterval = setInterval(() => {
-                timeLeft--; document.getElementById('comp-timer').innerText = timeLeft;
-                if(timeLeft <= 0) { clearInterval(compTimerInterval); quitGame(); }
+                timeLeft--; 
+                document.getElementById('comp-timer').innerText = timeLeft;
+                if(timeLeft <= 0) { clearInterval(compTimerInterval); alert("انتهى الوقت!"); quitGame(); }
             }, 1000);
         }
 
-        function winComp() { clearInterval(compTimerInterval); gameActive = false; player.points += 130; save(); alert("فزت بالتحدي!"); showMainMenu(); }
+        function winComp() { 
+            clearInterval(compTimerInterval); 
+            gameActive = false; 
+            player.points += 130; 
+            save(); 
+            alert("كفو! فزت بـ 130 نقطة."); 
+            showMainMenu(); 
+        }
+
         function exchangePoints() { if(player.points >= 10){ player.points-=10; player.attempts++; updateUI(); save(); } }
         function quitGame() { gameActive = false; clearInterval(fallTimer); clearInterval(compTimerInterval); showMainMenu(); }
         function save() { new Image().src = `${SCRIPT_URL}?action=save&id=${player.id}&points=${player.points}&attempts=${player.attempts}`; }
