@@ -9,94 +9,93 @@
         :root {
             --primary-gold: #c29547; --coffee-dark: #3e2723;
             --ivory-bg: #fdf5e6; --card-bg: #ffffff;
-            --text-main: #3e2723;
+            --text-main: #3e2723; --clay-warm: #d84315;
         }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { 
             margin: 0; font-family: 'Cairo', sans-serif; 
             background: var(--ivory-bg); color: var(--text-main); 
-            height: 100vh; display: flex; align-items: center; justify-content: center; 
+            height: 100vh; overflow: hidden;
         }
+
+        .screen { position: absolute; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; padding: 20px; transition: 0.3s; }
+        .hidden { display: none !important; }
 
         .card { 
             background: var(--card-bg); padding: 30px; border-radius: 25px; 
             border: 2px solid var(--primary-gold); box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
-            text-align: center; width: 90%; max-width: 400px; 
+            text-align: center; width: 100%; max-width: 400px; 
         }
 
-        h1 { font-family: 'Amiri', serif; font-size: 2.5rem; color: var(--primary-gold); margin-bottom: 20px; }
+        h1 { font-family: 'Amiri', serif; font-size: 2.5rem; color: var(--primary-gold); margin: 0 0 20px 0; }
 
         .auth-tabs { display: flex; gap: 10px; margin-bottom: 20px; }
-        .tab-btn { 
-            flex: 1; padding: 10px; border: 2px solid var(--primary-gold); 
-            border-radius: 10px; background: transparent; cursor: pointer; 
-            font-weight: bold; color: var(--primary-gold); 
-        }
+        .tab-btn { flex: 1; padding: 10px; border: 2px solid var(--primary-gold); border-radius: 10px; background: transparent; cursor: pointer; font-weight: bold; color: var(--primary-gold); }
         .tab-btn.active { background: var(--primary-gold); color: white; }
 
-        input { 
-            width: 100%; padding: 12px; margin: 10px 0; 
-            border: 1.5px solid #ddd; border-radius: 10px; text-align: center; font-size: 1rem; 
-        }
-
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 1.5px solid #ddd; border-radius: 10px; text-align: center; font-size: 1.1rem; }
+        
         .main-btn { 
-            background: var(--primary-gold); color: white; border: none; 
-            padding: 15px; border-radius: 12px; font-size: 1.1rem; 
-            font-weight: bold; cursor: pointer; width: 100%; 
+            background: var(--primary-gold); color: white; border: none; padding: 15px; border-radius: 12px; 
+            font-size: 1.1rem; font-weight: bold; cursor: pointer; width: 100%; 
             display: flex; align-items: center; justify-content: center; gap: 10px;
         }
+        .main-btn:disabled { background: #ccc; }
 
-        .main-btn:disabled { background: #ccc; cursor: not-allowed; }
-
-        /* أنيميشن جاري التحميل */
-        .spinner {
-            width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.3);
-            border-radius: 50%; border-top-color: #fff;
-            animation: spin 1s ease-in-out infinite; display: none;
-        }
+        .spinner { width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: #fff; animation: spin 1s linear infinite; display: none; }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        .hidden { display: none !important; }
+        /* شاشة الإحصائيات */
+        .stats-bar { position: absolute; top: 20px; display: flex; gap: 10px; z-index: 100; }
+        .stat-item { background: white; padding: 5px 15px; border-radius: 10px; border: 1px solid var(--primary-gold); font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <div class="card">
-        <h1>سِجال</h1>
-        
-        <div class="auth-tabs">
-            <button id="tab-login" class="tab-btn active" onclick="toggleAuth('login')">دخول (ID)</button>
-            <button id="tab-reg" class="tab-btn" onclick="toggleAuth('reg')">تسجيل جديد</button>
-        </div>
+    <div id="auth-screen" class="screen">
+        <div class="card">
+            <h1>سِجال</h1>
+            <div class="auth-tabs">
+                <button id="tab-login" class="tab-btn active" onclick="toggleAuth('login')">دخول (ID)</button>
+                <button id="tab-reg" class="tab-btn" onclick="toggleAuth('reg')">تسجيل جديد</button>
+            </div>
 
-        <div id="login-form">
-            <input type="text" id="login-id" placeholder="أدخل الـ ID الخاص بك">
-            <button class="main-btn" id="btn-login" onclick="handleLogin()">
-                <div class="spinner" id="spin-login"></div>
-                <span id="txt-login">📜 دخول المجلس</span>
-            </button>
-        </div>
-
-        <div id="reg-form" class="hidden">
-            <div id="step-1">
-                <input type="email" id="reg-email" placeholder="بريدك الإلكتروني">
-                <button class="main-btn" id="btn-send" onclick="handleSendCode()">
-                    <div class="spinner" id="spin-send"></div>
-                    <span id="txt-send">إرسال كود التحقق</span>
+            <div id="login-form">
+                <input type="text" id="login-id" placeholder="أدخل الـ ID الخاص بك">
+                <button class="main-btn" id="btn-login" onclick="handleLogin()">
+                    <div class="spinner" id="spin-login"></div>
+                    <span id="txt-login">📜 دخول المجلس</span>
                 </button>
             </div>
-            <div id="step-2" class="hidden">
-                <input type="text" id="verify-code" placeholder="أدخل الكود المستلم">
-                <button class="main-btn" id="btn-verify" onclick="handleVerify()">
-                    <div class="spinner" id="spin-verify"></div>
-                    <span id="txt-verify">تأكيد التسجيل</span>
-                </button>
+
+            <div id="reg-form" class="hidden">
+                <div id="step-1">
+                    <input type="email" id="reg-email" placeholder="بريدك الإلكتروني">
+                    <button class="main-btn" id="btn-send" onclick="handleSendCode()">
+                        <div class="spinner" id="spin-send"></div>
+                        <span id="txt-send">إرسال كود التحقق</span>
+                    </button>
+                </div>
             </div>
+        </div>
+    </div>
+
+    <div id="main-menu" class="screen hidden">
+        <div class="stats-bar">
+            <div class="stat-item">النقاط: <span id="m-points">0</span></div>
+            <div class="stat-item">المحاولات: <span id="m-attempts">0</span></div>
+        </div>
+        <div class="card">
+            <h1>مرحباً بك</h1>
+            <p id="player-welcome"></p>
+            <button class="main-btn" onclick="alert('ستبدأ اللعبة قريباً!')">🎮 ابدأ اللعب</button>
+            <button class="main-btn" style="background:#666; margin-top:10px" onclick="location.reload()">تسجيل خروج</button>
         </div>
     </div>
 
     <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxLutalsPEehqIcn7JT45pnbS8ueNz83C7EHgyy-1tC6YaAp8PwMRc1wTBjIAl81_E/exec";
+        let player = { id: '', points: 0, attempts: 0 };
 
         function toggleAuth(mode) {
             document.getElementById('login-form').classList.toggle('hidden', mode !== 'login');
@@ -105,53 +104,66 @@
             document.getElementById('tab-reg').classList.toggle('active', mode === 'reg');
         }
 
+        // --- وظيفة الدخول المحسنة ---
         async function handleLogin() {
-            startLoading('btn-login', 'spin-login', 'txt-login', 'جاري الدخول...');
-            // هنا تضع كود الـ fetch الخاص بالدخول
-            setTimeout(() => stopLoading('btn-login', 'spin-login', 'txt-login', '📜 دخول المجلس'), 2000); 
-        }
+            const idVal = document.getElementById('login-id').value.trim();
+            if(!idVal) return alert("يرجى إدخال الـ ID");
 
-        async function handleSendCode() {
-            const email = document.getElementById('reg-email').value;
-            if(!email) return alert("فضلاً أدخل الإيميل");
+            startLoading('btn-login', 'spin-login', 'txt-login', 'جاري التحقق من الهوية...');
 
-            startLoading('btn-send', 'spin-send', 'txt-send', 'جاري الإرسال...');
-            
             try {
-                const res = await fetch(SCRIPT_URL, { 
-                    method: 'POST', 
-                    body: JSON.stringify({ action: 'sendCode', email: email }) 
+                // نستخدم POST ونرسل JSON كما يتوقع السكربت الخاص بك
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'login', id: idVal })
                 });
-                const data = await res.json();
-                if(data.result === "success") {
-                    document.getElementById('step-1').classList.add('hidden');
-                    document.getElementById('step-2').classList.remove('hidden');
-                } else { alert("خطأ في الإرسال"); }
-            } catch (e) { alert("فشل الاتصال"); }
+                
+                const data = await response.json();
 
-            stopLoading('btn-send', 'spin-send', 'txt-send', 'إرسال كود التحقق');
+                if(data.result === "found") {
+                    player.id = idVal;
+                    player.points = data.points;
+                    player.attempts = data.attempts;
+                    
+                    // الانتقال لشاشة اللعبة
+                    showDashboard();
+                } else {
+                    alert("عذراً، هذا المعرّف (ID) غير مسجل لدينا.");
+                }
+            } catch (error) {
+                console.error(error);
+                alert("حدث خطأ في الاتصال بالسيرفر. تأكد من الإنترنت.");
+            } finally {
+                stopLoading('btn-login', 'spin-login', 'txt-login', '📜 دخول المجلس');
+            }
         }
 
-        async function handleVerify() {
-            startLoading('btn-verify', 'spin-verify', 'txt-verify', 'جاري التحقق...');
-            // هنا كود التحقق verifyCode بنفس الطريقة
-            setTimeout(() => stopLoading('btn-verify', 'spin-verify', 'txt-verify', 'تأكيد التسجيل'), 2000);
+        function showDashboard() {
+            document.getElementById('auth-screen').classList.add('hidden');
+            document.getElementById('main-menu').classList.remove('hidden');
+            document.getElementById('m-points').innerText = player.points;
+            document.getElementById('m-attempts').innerText = player.attempts;
+            document.getElementById('player-welcome').innerText = "المعرف الخاص بك: " + player.id;
         }
 
         // دالة تشغيل حالة التحميل
-        function startLoading(btnId, spinId, txtId, loadingMsg) {
+        function startLoading(btnId, spinId, txtId, msg) {
             document.getElementById(btnId).disabled = true;
             document.getElementById(spinId).style.display = 'block';
-            document.getElementById(txtId).innerText = loadingMsg;
+            document.getElementById(txtId).innerText = msg;
         }
 
         // دالة إيقاف حالة التحميل
-        function stopLoading(btnId, spinId, txtId, originalMsg) {
+        function stopLoading(btnId, spinId, txtId, msg) {
             document.getElementById(btnId).disabled = false;
             document.getElementById(spinId).style.display = 'none';
-            document.getElementById(txtId).innerText = originalMsg;
+            document.getElementById(txtId).innerText = msg;
+        }
+
+        // (وظائف التسجيل تضاف هنا بنفس منطق الـ Login)
+        async function handleSendCode() {
+            alert("هذه الخاصية تتطلب إعداد إرسال الإيميلات في السكربت.");
         }
     </script>
 </body>
 </html>
-
