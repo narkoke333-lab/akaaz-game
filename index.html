@@ -2,279 +2,279 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>عُكاظ | النسخة الاحترافية</title>
-    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@700&family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>جامع الشيخ عطا - النظام المتكامل</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary-gold: #c29547; --coffee-dark: #3e2723; --clay-warm: #d84315;
-            --ivory-bg: #fdf5e6; --sand-soft: #f4ece1; --card-bg: rgba(255, 255, 255, 0.95);
-            --text-main: #3e2723; --shadow: rgba(62, 39, 35, 0.15); --sidebar-bg: rgba(194, 149, 71, 0.1);
+        :root { --p: #1b4332; --g: #d4af37; --bg: #f4f7f6; }
+        body { background: var(--bg); font-family: 'Tajawal', sans-serif; margin: 0; direction: rtl; }
+        header { background: var(--p); color: var(--g); padding: 25px; text-align: center; border-bottom: 5px solid var(--g); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        
+        .main-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px; padding: 25px; max-width: 1100px; margin: auto; }
+        .card { background: white; border-radius: 20px; padding: 25px; text-align: center; cursor: pointer; transition: 0.3s; border: 1px solid #ddd; box-shadow: 0 5px 15px rgba(0,0,0,0.05); position: relative; }
+        .card:hover { transform: translateY(-5px); border-color: var(--g); }
+        .card h2 { font-size: 1rem; color: var(--p); }
+
+        .notification-badge { display: none; position: absolute; top: 15px; right: 15px; background: #ff4757; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 8px rgba(255, 71, 87, 0.6); z-index: 10; }
+
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; backdrop-filter: blur(5px); }
+        .modal-content { background: white; width: 95%; max-width: 800px; margin: 3vh auto; padding: 30px; border-radius: 25px; position: relative; max-height: 90vh; overflow-y: auto; }
+        
+        input, select, textarea { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 12px; font-size: 1rem; box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
+        .btn-p { background: var(--p); color: white; border: none; padding: 14px; border-radius: 12px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .btn-wa { background: #25D366; color: white; padding: 5px 10px; border-radius: 8px; text-decoration: none; font-size: 0.8rem; display: inline-block; font-weight: bold;}
+        
+        .msg-box { border: 1px solid #ddd; padding: 10px; margin-bottom: 10px; border-radius: 10px; border-right: 5px solid var(--g); background: #fff; }
+        .strike-tag { background: #ff4757; color: white; padding: 2px 8px; border-radius: 5px; font-size: 0.8rem; }
+        .action-btn { padding: 5px 15px; border-radius: 5px; border: none; cursor: pointer; font-weight: bold; margin: 2px; }
+
+        .circle-header { background: var(--g); color: var(--p); padding: 10px; margin-top: 20px; border-radius: 10px; font-weight: bold; text-align: center; }
+        .student-profile { border: 1px solid #ddd; padding: 15px; margin-bottom: 10px; border-radius: 12px; background: #fafafa; text-align: right; }
+        .profile-row { display: flex; justify-content: space-between; font-size: 0.9rem; padding: 6px 0; border-bottom: 1px dashed #eee; }
+        .report-table { width: 100%; border-collapse: collapse; margin-top: 10px; background: white; }
+        .report-table th, .report-table td { border: 1px solid #ddd; padding: 10px; text-align: center; }
+
+        .loading { display: none; color: var(--g); font-weight: bold; margin: 10px 0; text-align: center; }
+        #toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); padding: 15px 30px; border-radius: 50px; color: white; display: none; z-index: 3000; }
+
+        .print-area { display: none; }
+        @media print {
+            body * { visibility: hidden; }
+            .print-area, .print-area * { visibility: visible; }
+            .print-area { display: block; position: absolute; left: 0; top: 0; width: 100%; }
+            .no-print { display: none !important; }
         }
-        .dark-theme {
-            --primary-gold: #d4af37; --coffee-dark: #f4ece1; --clay-warm: #ff5722;
-            --ivory-bg: #121212; --sand-soft: #1a1a1a; --card-bg: rgba(30, 30, 30, 0.98);
-            --text-main: #e0e0e0; --shadow: rgba(0, 0, 0, 0.5); --sidebar-bg: rgba(212, 175, 55, 0.05);
-        }
-        * { box-sizing: border-box; transition: background 0.3s, color 0.3s; -webkit-tap-highlight-color: transparent; }
-        body { margin: 0; font-family: 'Cairo', sans-serif; background: var(--ivory-bg); color: var(--text-main); height: 100vh; overflow: hidden; display: flex; }
-        @media (max-width: 800px) { body { flex-direction: column; } .sidebar { width: 100% !important; height: auto !important; border-left: none !important; border-bottom: 2px solid var(--primary-gold); } }
-        .sidebar { width: 280px; background: var(--sidebar-bg); border-left: 1px solid var(--primary-gold); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; text-align: center; z-index: 10; }
-        .quote { font-family: 'Amiri', serif; font-size: 1.3rem; color: var(--primary-gold); }
-        .main { flex: 1; position: relative; display: flex; align-items: center; justify-content: center; width: 100%; }
-        .screen { position: absolute; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; z-index: 5; }
-        .hidden { display: none !important; }
-        .card { background: var(--card-bg); padding: 30px; border-radius: 20px; border: 1px solid var(--primary-gold); box-shadow: 0 10px 30px var(--shadow); text-align: center; width: 100%; max-width: 380px; }
-        h1 { font-family: 'Amiri', serif; font-size: 2.2rem; color: var(--primary-gold); margin: 0 0 15px 0; }
-        input { width: 100%; padding: 12px; margin: 10px 0; border: 1.5px solid var(--primary-gold); border-radius: 10px; text-align: center; font-size: 1rem; background: white; color: #000; }
-        button { background: var(--primary-gold); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        button:disabled { opacity: 0.7; cursor: not-allowed; }
-        .spinner { width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: #fff; animation: spin 0.8s linear infinite; display: none; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .tabs { display: flex; gap: 8px; margin-bottom: 15px; }
-        .tab-btn { flex: 1; padding: 8px; border-radius: 8px; border: 1px solid var(--primary-gold); background: transparent; color: var(--primary-gold); font-size: 0.9rem; cursor: pointer; }
-        .tab-btn.active { background: var(--primary-gold); color: white; }
-        .stats-bar { position: absolute; top: 15px; display: flex; gap: 10px; z-index: 20; }
-        .stat-item { background: var(--card-bg); padding: 5px 12px; border-radius: 8px; border: 1px solid var(--primary-gold); font-size: 0.85rem; font-weight: bold; }
-        #game-area { width: 100%; height: 65vh; position: relative; overflow: hidden; border-bottom: 2px dashed var(--primary-gold); }
-        .falling-word { position: absolute; font-family: 'Amiri', serif; font-size: 2.3rem; font-weight: bold; color: var(--clay-warm); white-space: nowrap; text-shadow: 1px 1px 2px rgba(0,0,0,0.1); }
     </style>
 </head>
 <body>
 
-    <aside class="sidebar">
-        <div class="quote">"العلمُ صيدٌ والكتابةُ قيدُه"</div>
-        <div style="margin-top:10px; font-weight:bold; color:var(--clay-warm)">— الشافعي</div>
-    </aside>
+<div id="toast"></div>
+<div id="print-area" class="print-area"><div id="print-content"></div></div>
+<header><h1>نظام جامع الشيخ عطا الرقمي</h1></header>
 
-    <main class="main">
-        <div id="auth-screen" class="screen">
-            <div class="card">
-                <h1>عُكاظ</h1>
-                <div class="tabs">
-                    <button id="t-login" class="tab-btn active" onclick="toggleAuth('login')">دخول</button>
-                    <button id="t-reg" class="tab-btn" onclick="toggleAuth('reg')">تسجيل</button>
-                </div>
-                <div id="login-form">
-                    <input type="text" id="login-id" placeholder="أدخل المعرّف الرقمي (ID)">
-                    <button id="btn-login" onclick="login()">
-                        <div class="spinner" id="spin-l"></div> <span id="txt-l">📜 دخول المجلس</span>
-                    </button>
-                </div>
-                <div id="reg-form" class="hidden">
-                    <div id="email-step">
-                        <input type="email" id="reg-email" placeholder="البريد الإلكتروني">
-                        <button id="btn-otp" onclick="requestOTP()">
-                            <div class="spinner" id="spin-otp"></div> <span id="txt-otp">إرسال كود التحقق</span>
-                        </button>
-                    </div>
-                    <div id="otp-step" class="hidden">
-                        <input type="text" id="otp-input" placeholder="أدخل الكود (6 أرقام)">
-                        <button id="btn-verify" onclick="verifyAndRegister()">
-                            <div class="spinner" id="spin-v"></div> <span id="txt-v">تأكيد وإنشاء الحساب</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
+<div class="main-grid no-print">
+    <div class="card" onclick="openModal('att-modal')"><h2>🆔 تسجيل الحضور</h2></div>
+    <div class="card" onclick="openModal('search-modal')"><h2>🔍 استعلام متقدم</h2></div>
+    <div class="card" onclick="openModal('absent-modal')"><h2>🚫 كشف الغياب</h2></div>
+    <div class="card" onclick="openModal('reg-modal')"><h2>📝 تسجيل جديد</h2></div>
+    <div class="card" onclick="openModal('admin-review-modal'); loadBlocked();"><h2>⚠️ مراجعات وفصل</h2></div>
+    
+    <div class="card" onclick="openModal('messages-modal'); loadMessages();">
+        <div id="msg-badge" class="notification-badge"></div>
+        <h2>📩 رسائل المعلمين</h2>
+    </div>
 
-        <div id="main-menu" class="screen hidden">
-            <div class="stats-bar">
-                <div class="stat-item">النقاط: <span id="m-points">0</span></div>
-                <div class="stat-item">المحاولات: <span id="m-attempts">0</span></div>
-            </div>
-            <div class="card">
-                <h1>المجلس الرئيسي</h1>
-                <button onclick="startGame(false)">🎮 لعب حر</button>
-                <button onclick="showCompMenu()" style="background:var(--clay-warm)">🏆 مسابقات</button>
-                <button onclick="exchangePoints()" style="background:#4caf50">🔄 استبدال (10ن = 1 محاولة)</button>
-                <button onclick="toggleTheme()" style="background:var(--coffee-dark)">🌓 المظهر</button>
-                <button onclick="location.reload()" style="background:#666; margin-top:10px">خروج</button>
-            </div>
-        </div>
+    <div class="card" onclick="openModal('broadcast-modal')" style="background: #fff3e0; border: 1px dashed var(--g);">
+        <h2>📢 تعميم للحلقات</h2>
+    </div>
+</div>
 
-        <div id="comp-menu" class="screen hidden">
-            <div class="card">
-                <h1>التحدي الكبير</h1>
-                <p>60 كلمة في 140 ثانية</p>
-                <p style="color:var(--clay-warm)">الاشتراك: 30 نقطة | الجائزة: 130 نقطة</p>
-                <button onclick="startGame(true)" style="background:var(--clay-warm)">🚀 ابدأ التحدي</button>
-                <button onclick="showMainMenu()" style="background:#666">العودة</button>
-            </div>
-        </div>
+<div id="search-modal" class="modal"><div class="modal-content">
+    <h3 class="no-print">البحث والاستعلام المطور</h3>
+    <input type="text" id="s-query" placeholder="ابحث بـ (الاسم، ID، الصف، أو 'نعم' للأيتام)">
+    <div style="display: flex; gap: 10px;" class="no-print">
+        <button class="btn-p" onclick="runSearch('brief')">بطاقة مختصرة</button>
+        <button class="btn-p" style="background:#2d3436" onclick="runSearch('full')">بطاقة كاملة</button>
+    </div>
+    <div id="s-load" class="loading">جاري جلب البيانات... ⏳</div>
+    <div id="s-res"></div>
+    <button class="btn-p no-print" id="btn-p-s" style="display:none; background: #666;" onclick="doPrint('s-res')">طباعة النتيجة</button>
+    <button class="btn-p no-print" style="background:#999" onclick="closeModal('search-modal')">إغلاق</button>
+</div></div>
 
-        <div id="game-screen" class="screen hidden">
-            <div id="comp-header" class="hidden" style="width: 100%; max-width: 400px; display:flex; justify-content:space-between; margin-bottom:10px; font-weight:bold; color:var(--clay-warm)">
-                <span>الوقت: <b id="comp-timer">140</b></span>
-                <span>الكلمات: <b id="comp-count">0</b>/60</span>
-            </div>
-            <div id="game-area"></div>
-            <input type="text" id="word-entry" placeholder="اكتب هنا..." autocomplete="off">
-            <button onclick="quitGame()" style="width:auto; padding:8px 20px; background:#666; margin-top:10px;">انسحاب</button>
-        </div>
-    </main>
+<div id="messages-modal" class="modal"><div class="modal-content">
+    <h3>رسائل الحلقات الواردة</h3>
+    <div id="msg-load" class="loading">جاري جلب الرسائل...</div>
+    <div id="msg-list" style="margin-top:15px;"></div>
+    <button class="btn-p" style="background:#999" onclick="closeModal('messages-modal')">إغلاق</button>
+</div></div>
 
-    <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyTTQEXVOQZPMhJBOjIksimB9fPjMS_jzXsMqdhUphs47e4JdyGstGGGbFhokKYY70/exec";
-        let player = { id: '', points: 0, attempts: 0 };
-        let serverOTP = "", userEmail = "", isCompMode = false, wordsWritten = 0, timeLeft = 140, gameActive = false, fallTimer, compTimerInterval;
+<div id="broadcast-modal" class="modal"><div class="modal-content">
+    <h3>إرسال تعميم لجميع الحلقات</h3>
+    <textarea id="bc-text" placeholder="اكتب نص التعميم هنا..."></textarea>
+    <button class="btn-p" onclick="sendBroadcast()">إرسال التعميم الآن</button>
+    <button class="btn-p" style="background:#999" onclick="closeModal('broadcast-modal')">إغلاق</button>
+</div></div>
 
-        // إصلاح روابط الصوت لتعمل بشكل مباشر
-        const sounds = {
-            success: new Audio('https://cdn.pixabay.com/audio/2022/03/10/audio_c3527a406d.mp3'),
-            fail: new Audio('https://cdn.pixabay.com/audio/2022/03/15/audio_8233f2c5e5.mp3')
-        };
+<div id="admin-review-modal" class="modal"><div class="modal-content">
+    <h3>طلاب متجاوزين (غياب 3 أيام أو حظر)</h3>
+    <div id="blocked-load" class="loading">جاري جلب القائمة...</div>
+    <div id="blocked-list"></div>
+    <button class="btn-p" style="background:#999" onclick="closeModal('admin-review-modal')">إغلاق</button>
+</div></div>
 
-        // وظيفة لفك حظر الصوت في المتصفح
-        function unlockAudio() {
-            sounds.success.play().then(() => { sounds.success.pause(); sounds.success.currentTime = 0; });
-            sounds.fail.play().then(() => { sounds.fail.pause(); sounds.fail.currentTime = 0; });
-        }
+<div id="att-modal" class="modal"><div class="modal-content">
+    <h3>تسجيل الحضور اليومي</h3>
+    <input type="number" id="att-id" placeholder="أدخل ID الطالب">
+    <div id="att-load" class="loading">جاري التحقق... ⏳</div>
+    <button class="btn-p" onclick="doAttendance()">تسجيل حضور</button>
+    <button class="btn-p" style="background:#999" onclick="closeModal('att-modal')">إغلاق</button>
+</div></div>
 
-        function toggleAuth(m) {
-            document.getElementById('login-form').classList.toggle('hidden', m!=='login');
-            document.getElementById('reg-form').classList.toggle('hidden', m!=='reg');
-            document.getElementById('t-login').classList.toggle('active', m==='login');
-            document.getElementById('t-reg').classList.toggle('active', m==='reg');
-        }
+<div id="absent-modal" class="modal"><div class="modal-content">
+    <h3>تقرير الغياب والتواصل</h3>
+    <input type="text" id="abs-c" placeholder="اسم الحلقة (أو اترك فارغاً للكل)">
+    <input type="date" id="abs-date">
+    <button class="btn-p" onclick="runAbsent()">استخراج الأسماء</button>
+    <div id="abs-load" class="loading">جاري تحليل الغيابات... ⏳</div>
+    <div id="abs-res"></div>
+    <button class="btn-p no-print" id="btn-p-a" style="display:none; background: #666;" onclick="doPrint('abs-res')">طباعة الكشف</button>
+    <button class="btn-p no-print" style="background:#999" onclick="closeModal('absent-modal')">إغلاق</button>
+</div></div>
 
-        function setLoad(b,s,t,l,m) {
-            document.getElementById(b).disabled = l;
-            document.getElementById(s).style.display = l ? 'block' : 'none';
-            document.getElementById(t).innerText = m;
-        }
+<div id="reg-modal" class="modal"><div class="modal-content">
+    <h3>تسجيل طالب جديد</h3>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <input id="r-id" placeholder="ID"> <input id="r-name" placeholder="الاسم">
+        <input id="r-class" placeholder="الصف"> <input id="r-circle" placeholder="الحلقة">
+        <input id="r-father" placeholder="الأب"> <input id="r-mother" placeholder="الأم">
+        <input id="r-dob" type="date"> <input id="r-phone" placeholder="واتساب">
+        <input id="r-address" placeholder="العنوان" style="grid-column: span 2;">
+        <input id="r-family" type="number" placeholder="عدد الأسرة">
+        <select id="r-orphan" style="grid-column: span 2;"><option value="لا">يتيم: لا</option><option value="نعم">يتيم: نعم</option></select>
+    </div>
+    <button class="btn-p" onclick="doRegister()">حفظ</button>
+    <button class="btn-p" style="background:#999" onclick="closeModal('reg-modal')">إغلاق</button>
+</div></div>
 
-        async function login() {
-            unlockAudio();
-            const id = document.getElementById('login-id').value.trim();
-            if(!id) return alert("أدخل المعرف الرقمي");
-            setLoad('btn-login','spin-l','txt-l',true,'جاري الدخول...');
-            try {
-                const res = await fetch(SCRIPT_URL, {method:'POST', body:JSON.stringify({action:'login', id:id})});
-                const d = await res.json();
-                if(d.result === "found") {
-                    player = {id:id, points:d.points, attempts:d.attempts};
-                    showMainMenu();
-                } else alert("المعرف غير موجود");
-            } catch(e) { alert("خطأ في الاتصال بالسيرفر"); }
-            setLoad('btn-login','spin-l','txt-l',false,'📜 دخول المجلس');
-        }
+<script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzo4Z6YhurP8puWYxrDJ8MCT5wbvOwh8kozG_GaDpvMs4jxK0SPNwJZFM56XzD8R3XY/exec";
 
-        async function requestOTP() {
-            userEmail = document.getElementById('reg-email').value.trim();
-            if(!userEmail) return alert("أدخل البريد الإلكتروني");
-            setLoad('btn-otp','spin-otp','txt-otp',true,'جاري الإرسال...');
-            try {
-                const res = await fetch(SCRIPT_URL, {method:'POST', body:JSON.stringify({action:'request_otp', email:userEmail})});
-                const d = await res.json();
-                if(d.result === "otp_sent") {
-                    serverOTP = d.otp;
-                    document.getElementById('email-step').classList.add('hidden');
-                    document.getElementById('otp-step').classList.remove('hidden');
-                    alert("تم إرسال كود التحقق لبريدك");
-                } else alert(d.message);
-            } catch(e) { alert("خطأ اتصال"); }
-            setLoad('btn-otp','spin-otp','txt-otp',false,'إرسال كود التحقق');
-        }
+    function openModal(id) { document.getElementById(id).style.display = 'block'; }
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+    function msg(t, c) { const s = document.getElementById('toast'); s.innerText = t; s.style.background = c; s.style.display = 'block'; setTimeout(() => s.style.display='none', 3000); }
 
-        async function verifyAndRegister() {
-            unlockAudio();
-            if(document.getElementById('otp-input').value.trim() !== serverOTP) return alert("الكود خطأ");
-            setLoad('btn-verify','spin-v','txt-v',true,'إنشاء الحساب...');
-            try {
-                const res = await fetch(SCRIPT_URL, {method:'POST', body:JSON.stringify({action:'register_confirm', email:userEmail})});
-                const d = await res.json();
-                if(d.result === "success") {
-                    alert("تم التسجيل! تم إرسال الـ ID الرقمي إلى إيميلك: " + d.id);
-                    location.reload();
+    // وظيفة استخراج الغيابات (تمت إضافتها)
+    // وظيفة استخراج الغيابات المعدلة مع رسالة واتساب تلقائية
+    async function runAbsent() {
+        const circle = document.getElementById('abs-c').value;
+        const date = document.getElementById('abs-date').value;
+        if(!date) return msg("يرجى تحديد التاريخ", "orange");
+
+        document.getElementById('abs-load').style.display = 'block';
+        document.getElementById('abs-res').innerHTML = "";
+
+        try {
+            const res = await fetch(`${SCRIPT_URL}?action=searchStudent&query=`); 
+            const students = await res.json();
+            
+            let h = `<table class="report-table"><tr><th>الاسم</th><th>الحلقة</th><th>تواصل</th></tr>`;
+            let count = 0;
+
+            students.forEach(s => {
+                if(!circle || s.circle == circle) {
+                    // تجهيز نص الرسالة وتشفيره ليعمل في الرابط
+                    const messageText = `السلام عليكم، إن ابنكم (${s.name}) لم يحضر الدوام اليوم.`;
+                    const encodedMsg = encodeURIComponent(messageText);
+                    const waLink = `https://wa.me/${s.phone}?text=${encodedMsg}`;
+
+                    h += `<tr>
+                        <td>${s.name}</td>
+                        <td>${s.circle}</td>
+                        <td><a class="btn-wa" href="${waLink}" target="_blank">واتساب</a></td>
+                    </tr>`;
+                    count++;
                 }
-            } catch(e) { alert("خطأ في التسجيل"); }
-            setLoad('btn-verify','spin-v','txt-v',false,'تأكيد وإنشاء الحساب');
+            });
+
+            document.getElementById('abs-res').innerHTML = count ? h + "</table>" : "لم يتم العثور على طلاب.";
+            document.getElementById('btn-p-a').style.display = count ? 'block' : 'none';
+        } catch(e) {
+            msg("خطأ في جلب الغيابات", "red");
+        } finally {
+            document.getElementById('abs-load').style.display = 'none';
         }
+    }
 
-        function showMainMenu() { hideScreens(); document.getElementById('main-menu').classList.remove('hidden'); updateUI(); }
-        function showCompMenu() { hideScreens(); document.getElementById('comp-menu').classList.remove('hidden'); }
-        function hideScreens() { document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden')); }
-        function updateUI() { document.getElementById('m-points').innerText = player.points; document.getElementById('m-attempts').innerText = player.attempts; }
+    async function checkNewMessages() {
+        try {
+            const res = await fetch(`${SCRIPT_URL}?action=getTeacherMessages`);
+            const data = await res.json();
+            const lastSeenCount = parseInt(localStorage.getItem('lastMsgCount')) || 0;
+            document.getElementById('msg-badge').style.display = data.length > lastSeenCount ? 'block' : 'none';
+        } catch(e) {}
+    }
 
-        function startGame(comp) {
-            if(comp) {
-                if(player.points < 30) return alert("نقاطك لا تكفي");
-                player.points -= 30; isCompMode = true; wordsWritten = 0; timeLeft = 140;
-                document.getElementById('comp-header').classList.remove('hidden');
-                startCompTimer();
-            } else {
-                if(player.attempts <= 0) return alert("لا يوجد محاولات");
-                isCompMode = false; document.getElementById('comp-header').classList.add('hidden');
-            }
-            hideScreens(); document.getElementById('game-screen').classList.remove('hidden');
-            gameActive = true; spawnWord(); document.getElementById('word-entry').focus();
-        }
-
-        function spawnWord() {
-            if(!gameActive) return;
-            const words = ["نخيل", "فروسية", "أصالة", "فصاحة", "كرم", "مروءة", "بيداء", "شجاعة", "مجلس", "سيف", "خيل", "قهوة", "شعر"];
-            const area = document.getElementById('game-area');
-            area.innerHTML = '';
-            const word = words[Math.floor(Math.random() * words.length)];
-            const el = document.createElement('div');
-            el.className = 'falling-word';
-            el.innerText = word;
-            area.appendChild(el);
-            el.style.left = Math.random() * (area.offsetWidth - 100) + 'px';
-            let top = -50;
-            fallTimer = setInterval(() => {
-                top += (isCompMode ? 2.6 : 1.9);
-                el.style.top = top + 'px';
-                if(top > area.offsetHeight - 50) {
-                    clearInterval(fallTimer);
-                    if(!isCompMode) { 
-                        player.attempts--; 
-                        sounds.fail.play().catch(()=>{}); // صوت الخسارة
-                        save(); 
-                    }
-                    if(player.attempts > 0 || isCompMode) spawnWord(); else quitGame();
-                    updateUI();
-                }
-            }, 30);
-        }
-
-        document.getElementById('word-entry').addEventListener('input', (e) => {
-            if(e.target.value.trim() === document.querySelector('.falling-word')?.innerText) {
-                clearInterval(fallTimer); 
-                sounds.success.play().catch(()=>{}); // صوت النجاح
-                e.target.value = '';
-                if(isCompMode) {
-                    wordsWritten++; 
-                    document.getElementById('comp-count').innerText = wordsWritten;
-                    if(wordsWritten >= 60) winComp(); else spawnWord();
-                } else {
-                    player.points++; save(); updateUI(); spawnWord();
-                }
-            }
+    async function loadMessages() {
+        document.getElementById('msg-load').style.display = 'block';
+        const res = await fetch(`${SCRIPT_URL}?action=getTeacherMessages`);
+        const data = await res.json();
+        document.getElementById('msg-load').style.display = 'none';
+        document.getElementById('msg-badge').style.display = 'none';
+        localStorage.setItem('lastMsgCount', data.length);
+        let h = "";
+        data.reverse().forEach(m => {
+            h += `<div class="msg-box"><b>حلقة: ${m.circle}</b> <small>(${m.date})</small><p>${m.text}</p></div>`;
         });
+        document.getElementById('msg-list').innerHTML = h || "لا توجد رسائل.";
+    }
 
-        function startCompTimer() {
-            compTimerInterval = setInterval(() => {
-                timeLeft--; 
-                document.getElementById('comp-timer').innerText = timeLeft;
-                if(timeLeft <= 0) { clearInterval(compTimerInterval); alert("انتهى الوقت!"); quitGame(); }
-            }, 1000);
-        }
+    async function sendBroadcast() {
+        const text = document.getElementById('bc-text').value;
+        if(!text) return msg("اكتب نصاً أولاً", "orange");
+        msg("جاري الحفظ...", "blue");
+        await fetch(`${SCRIPT_URL}?action=sendAdminGlobalNote&note=${encodeURIComponent(text)}`, {method:'POST'});
+        msg("تم التعميم ✅", "green");
+        closeModal('broadcast-modal');
+    }
 
-        function winComp() { 
-            clearInterval(compTimerInterval); 
-            gameActive = false; 
-            player.points += 130; 
-            save(); 
-            alert("كفو! فزت بـ 130 نقطة."); 
-            showMainMenu(); 
-        }
+    async function loadBlocked() {
+        document.getElementById('blocked-load').style.display = 'block';
+        const res = await fetch(`${SCRIPT_URL}?action=getBlockedStudents`);
+        const data = await res.json();
+        document.getElementById('blocked-load').style.display = 'none';
+        let h = `<table class="report-table"><tr><th>الاسم</th><th>الحلقة</th><th>الإجراء</th></tr>`;
+        data.forEach(s => {
+            h += `<tr><td>${s.name}</td><td>${s.circle}</td><td><button class="action-btn" style="background:#28a745; color:white;" onclick="handleStatus('${s.id}', 'سماح')">سماح</button><button class="action-btn" style="background:#dc3545; color:white;" onclick="handleStatus('${s.id}', 'فصل')">فصل</button></td></tr>`;
+        });
+        document.getElementById('blocked-list').innerHTML = data.length ? h + "</table>" : "لا يوجد متجاوزين.";
+    }
 
-        function exchangePoints() { if(player.points >= 10){ player.points-=10; player.attempts++; updateUI(); save(); } }
-        function quitGame() { gameActive = false; clearInterval(fallTimer); clearInterval(compTimerInterval); showMainMenu(); }
-        function save() { new Image().src = `${SCRIPT_URL}?action=save&id=${player.id}&points=${player.points}&attempts=${player.attempts}`; }
-        function toggleTheme() { document.body.classList.toggle('dark-theme'); }
-    </script>
+    async function handleStatus(id, status) {
+        if(!confirm(`تأكيد ال${status}؟`)) return;
+        await fetch(`${SCRIPT_URL}?action=updateStatus&id=${id}&status=${status}`, {method:'POST'});
+        msg("تم بنجاح ✅", "green"); loadBlocked();
+    }
+
+    async function runSearch(mode) {
+        const q = document.getElementById('s-query').value;
+        if(!q) return;
+        document.getElementById('s-load').style.display = 'block';
+        const res = await fetch(`${SCRIPT_URL}?action=searchStudent&query=${encodeURIComponent(q)}`);
+        const data = await res.json();
+        document.getElementById('s-load').style.display = 'none';
+        let h = "";
+        data.forEach(s => {
+            h += `<div class="student-profile"><b>${s.name}</b> - ${s.circle}</div>`;
+        });
+        document.getElementById('s-res').innerHTML = h || "لا توجد نتائج.";
+        document.getElementById('btn-p-s').style.display = data.length ? 'block' : 'none';
+    }
+
+    async function doAttendance() {
+        const id = document.getElementById('att-id').value;
+        if(!id) return;
+        document.getElementById('att-load').style.display = 'block';
+        const row = [id, "حاضر", new Date().toLocaleDateString(), new Date().toLocaleTimeString()];
+        await fetch(`${SCRIPT_URL}?sheetName=الحضور&data=${JSON.stringify(row)}`, {method:'POST'});
+        document.getElementById('att-load').style.display = 'none';
+        document.getElementById('att-id').value = "";
+        msg("تم التحضير ✅", "green");
+    }
+
+    async function doRegister() {
+        const d = [document.getElementById('r-id').value, document.getElementById('r-name').value, document.getElementById('r-class').value, 0, new Date().toLocaleDateString(), document.getElementById('r-phone').value, document.getElementById('r-father').value, document.getElementById('r-mother').value, document.getElementById('r-dob').value, document.getElementById('r-circle').value, document.getElementById('r-address').value, document.getElementById('r-family').value, document.getElementById('r-orphan').value];
+        await fetch(`${SCRIPT_URL}?sheetName=الطلاب&data=${JSON.stringify(d)}`, {method:'POST'});
+        msg("تم التسجيل ✅", "green"); closeModal('reg-modal');
+    }
+
+    function doPrint(id) {
+        document.getElementById('print-content').innerHTML = `<h2>تقرير جامع الشيخ عطا</h2>` + document.getElementById(id).innerHTML;
+        window.print();
+    }
+
+    setInterval(checkNewMessages, 20000);
+    checkNewMessages();
+</script>
 </body>
 </html>
