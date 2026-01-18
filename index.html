@@ -113,8 +113,6 @@
 
             peer.on('connection', (c) => {
                 conn = c;
-                // عند الاتصال، نرسل الفيديو فوراً إذا كان جاهزاً
-                // ولكن الأفضل الانتظار حتى يطلب الكمبيوتر (call)
             });
 
             // الرد التلقائي على طلب الفيديو
@@ -177,17 +175,16 @@
                 updateModel();
             });
 
-            // 2. طلب الفيديو (هنا السر: الكمبيوتر يطلب والموبايل يرد)
+            // 2. طلب الفيديو (انتظار 1 ثانية لضمان الاستقرار)
             setTimeout(() => {
-                const call = peer.call(id, new MediaStream()); // Dummy stream to init call
+                const call = peer.call(id, new MediaStream());
                 call.on('stream', (remoteStream) => {
-                    console.log("تم استلام الفيديو!");
                     const video = document.getElementById('remote-video');
                     video.srcObject = remoteStream;
-                    video.play(); // تأكيد التشغيل
+                    video.play();
                 });
                 call.on('error', err => alert("خطأ في استقبال الفيديو: " + err));
-            }, 1000); // ننتظر ثانية لضمان استقرار الاتصال
+            }, 1000);
         }
 
         function calibrate() {
