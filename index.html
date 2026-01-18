@@ -3,278 +3,167 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>جامع الشيخ عطا - النظام المتكامل</title>
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+    <title>نظام التحكم الفضائي (WebRTC)</title>
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
-        :root { --p: #1b4332; --g: #d4af37; --bg: #f4f7f6; }
-        body { background: var(--bg); font-family: 'Tajawal', sans-serif; margin: 0; direction: rtl; }
-        header { background: var(--p); color: var(--g); padding: 25px; text-align: center; border-bottom: 5px solid var(--g); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        body { background: #000; color: #0f0; font-family: monospace; text-align: center; overflow: hidden; }
+        h1 { margin: 10px; font-size: 1.2rem; text-shadow: 0 0 10px #0f0; }
         
-        .main-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px; padding: 25px; max-width: 1100px; margin: auto; }
-        .card { background: white; border-radius: 20px; padding: 25px; text-align: center; cursor: pointer; transition: 0.3s; border: 1px solid #ddd; box-shadow: 0 5px 15px rgba(0,0,0,0.05); position: relative; }
-        .card:hover { transform: translateY(-5px); border-color: var(--g); }
-        .card h2 { font-size: 1rem; color: var(--p); }
+        /* واجهة الاختيار */
+        #menu { display: flex; flex-direction: column; gap: 20px; justify-content: center; height: 100vh; }
+        button { padding: 15px 30px; font-size: 1.2rem; background: #004400; color: #fff; border: 2px solid #0f0; cursor: pointer; border-radius: 10px; }
+        button:hover { background: #0f0; color: #000; }
 
-        .notification-badge { display: none; position: absolute; top: 15px; right: 15px; background: #ff4757; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 8px rgba(255, 71, 87, 0.6); z-index: 10; }
+        /* واجهة الموبايل (المرسل) */
+        #sender-panel { display: none; padding: 20px; }
+        .id-box { background: #222; padding: 15px; border: 1px dashed #0f0; margin: 10px; font-size: 1.5rem; user-select: all; }
+        #local-video { width: 50%; border: 1px solid #333; margin-top: 10px; opacity: 0.5; }
 
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; backdrop-filter: blur(5px); }
-        .modal-content { background: white; width: 95%; max-width: 800px; margin: 3vh auto; padding: 30px; border-radius: 25px; position: relative; max-height: 90vh; overflow-y: auto; }
+        /* واجهة الكمبيوتر (المستقبل) */
+        #receiver-panel { display: none; height: 100vh; position: relative; }
+        #remote-video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; opacity: 0.6; }
         
-        input, select, textarea { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 12px; font-size: 1rem; box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
-        .btn-p { background: var(--p); color: white; border: none; padding: 14px; border-radius: 12px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        .btn-wa { background: #25D366; color: white; padding: 5px 10px; border-radius: 8px; text-decoration: none; font-size: 0.8rem; display: inline-block; font-weight: bold;}
-        
-        .msg-box { border: 1px solid #ddd; padding: 10px; margin-bottom: 10px; border-radius: 10px; border-right: 5px solid var(--g); background: #fff; }
-        .strike-tag { background: #ff4757; color: white; padding: 2px 8px; border-radius: 5px; font-size: 0.8rem; }
-        .action-btn { padding: 5px 15px; border-radius: 5px; border: none; cursor: pointer; font-weight: bold; margin: 2px; }
+        /* مشهد الـ 3D */
+        .scene { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 300px; height: 300px; perspective: 1000px; z-index: 10; }
+        .cube { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 0.05s linear; }
+        .face { position: absolute; width: 200px; height: 200px; left: 50px; top: 50px; border: 2px solid #0f0; background: rgba(0, 50, 0, 0.3); display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 2rem; box-shadow: 0 0 20px rgba(0, 255, 0, 0.2); color: #fff; }
+        .front { transform: translateZ(100px); }
+        .back { transform: rotateY(180deg) translateZ(100px); }
+        .right { transform: rotateY(90deg) translateZ(100px); }
+        .left { transform: rotateY(-90deg) translateZ(100px); }
+        .top { transform: rotateX(90deg) translateZ(100px); }
+        .bottom { transform: rotateX(-90deg) translateZ(100px); }
 
-        .circle-header { background: var(--g); color: var(--p); padding: 10px; margin-top: 20px; border-radius: 10px; font-weight: bold; text-align: center; }
-        .student-profile { border: 1px solid #ddd; padding: 15px; margin-bottom: 10px; border-radius: 12px; background: #fafafa; text-align: right; }
-        .profile-row { display: flex; justify-content: space-between; font-size: 0.9rem; padding: 6px 0; border-bottom: 1px dashed #eee; }
-        .report-table { width: 100%; border-collapse: collapse; margin-top: 10px; background: white; }
-        .report-table th, .report-table td { border: 1px solid #ddd; padding: 10px; text-align: center; }
-
-        .loading { display: none; color: var(--g); font-weight: bold; margin: 10px 0; text-align: center; }
-        #toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); padding: 15px 30px; border-radius: 50px; color: white; display: none; z-index: 3000; }
-
-        .print-area { display: none; }
-        @media print {
-            body * { visibility: hidden; }
-            .print-area, .print-area * { visibility: visible; }
-            .print-area { display: block; position: absolute; left: 0; top: 0; width: 100%; }
-            .no-print { display: none !important; }
-        }
+        input { padding: 10px; font-size: 1.2rem; text-align: center; width: 200px; }
+        .overlay-ui { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); z-index: 20; background: rgba(0,0,0,0.8); padding: 10px; border-radius: 10px; }
     </style>
 </head>
 <body>
 
-<div id="toast"></div>
-<div id="print-area" class="print-area"><div id="print-content"></div></div>
-<header><h1>نظام جامع الشيخ عطا الرقمي</h1></header>
-
-<div class="main-grid no-print">
-    <div class="card" onclick="openModal('att-modal')"><h2>🆔 تسجيل الحضور</h2></div>
-    <div class="card" onclick="openModal('search-modal')"><h2>🔍 استعلام متقدم</h2></div>
-    <div class="card" onclick="openModal('absent-modal')"><h2>🚫 كشف الغياب</h2></div>
-    <div class="card" onclick="openModal('reg-modal')"><h2>📝 تسجيل جديد</h2></div>
-    <div class="card" onclick="openModal('admin-review-modal'); loadBlocked();"><h2>⚠️ مراجعات وفصل</h2></div>
-    
-    <div class="card" onclick="openModal('messages-modal'); loadMessages();">
-        <div id="msg-badge" class="notification-badge"></div>
-        <h2>📩 رسائل المعلمين</h2>
+    <div id="menu">
+        <h1>اختر وضع التشغيل</h1>
+        <button onclick="startSender()">📱 أنا الموبايل (القمر الصناعي)</button>
+        <button onclick="startReceiver()">💻 أنا الكمبيوتر (المحطة الأرضية)</button>
     </div>
 
-    <div class="card" onclick="openModal('broadcast-modal')" style="background: #fff3e0; border: 1px dashed var(--g);">
-        <h2>📢 تعميم للحلقات</h2>
+    <div id="sender-panel">
+        <h2>وضع الإرسال</h2>
+        <p>انسخ هذا الكود وضعه في الكمبيوتر:</p>
+        <div class="id-box" id="my-id">جاري التوليد...</div>
+        <p id="status">بانتظار الإذن...</p>
+        <video id="local-video" autoplay muted playsinline></video>
+        <br><br>
+        <button onclick="requestSensors()">تفعيل الحساسات والكاميرا 🚀</button>
     </div>
-</div>
 
-<div id="search-modal" class="modal"><div class="modal-content">
-    <h3 class="no-print">البحث والاستعلام المطور</h3>
-    <input type="text" id="s-query" placeholder="ابحث بـ (الاسم، ID، الصف، أو 'نعم' للأيتام)">
-    <div style="display: flex; gap: 10px;" class="no-print">
-        <button class="btn-p" onclick="runSearch('brief')">بطاقة مختصرة</button>
-        <button class="btn-p" style="background:#2d3436" onclick="runSearch('full')">بطاقة كاملة</button>
+    <div id="receiver-panel">
+        <video id="remote-video" autoplay playsinline></video>
+        
+        <div class="overlay-ui" id="connect-ui">
+            <input type="text" id="target-id" placeholder="أدخل كود الموبايل هنا">
+            <button onclick="connectToMobile()">اتصال</button>
+        </div>
+
+        <div class="scene">
+            <div class="cube" id="cube">
+                <div class="face front">CAM</div>
+                <div class="face back">BACK</div>
+                <div class="face right">R</div>
+                <div class="face left">L</div>
+                <div class="face top">TOP</div>
+                <div class="face bottom">BTM</div>
+            </div>
+        </div>
     </div>
-    <div id="s-load" class="loading">جاري جلب البيانات... ⏳</div>
-    <div id="s-res"></div>
-    <button class="btn-p no-print" id="btn-p-s" style="display:none; background: #666;" onclick="doPrint('s-res')">طباعة النتيجة</button>
-    <button class="btn-p no-print" style="background:#999" onclick="closeModal('search-modal')">إغلاق</button>
-</div></div>
 
-<div id="messages-modal" class="modal"><div class="modal-content">
-    <h3>رسائل الحلقات الواردة</h3>
-    <div id="msg-load" class="loading">جاري جلب الرسائل...</div>
-    <div id="msg-list" style="margin-top:15px;"></div>
-    <button class="btn-p" style="background:#999" onclick="closeModal('messages-modal')">إغلاق</button>
-</div></div>
+    <script>
+        const peer = new Peer(); // إنشاء هوية عشوائية
+        let conn = null;
+        
+        // === منطق الموبايل (المرسل) ===
+        function startSender() {
+            document.getElementById('menu').style.display = 'none';
+            document.getElementById('sender-panel').style.display = 'block';
 
-<div id="broadcast-modal" class="modal"><div class="modal-content">
-    <h3>إرسال تعميم لجميع الحلقات</h3>
-    <textarea id="bc-text" placeholder="اكتب نص التعميم هنا..."></textarea>
-    <button class="btn-p" onclick="sendBroadcast()">إرسال التعميم الآن</button>
-    <button class="btn-p" style="background:#999" onclick="closeModal('broadcast-modal')">إغلاق</button>
-</div></div>
-
-<div id="admin-review-modal" class="modal"><div class="modal-content">
-    <h3>طلاب متجاوزين (غياب 3 أيام أو حظر)</h3>
-    <div id="blocked-load" class="loading">جاري جلب القائمة...</div>
-    <div id="blocked-list"></div>
-    <button class="btn-p" style="background:#999" onclick="closeModal('admin-review-modal')">إغلاق</button>
-</div></div>
-
-<div id="att-modal" class="modal"><div class="modal-content">
-    <h3>تسجيل الحضور اليومي</h3>
-    <input type="number" id="att-id" placeholder="أدخل ID الطالب">
-    <div id="att-load" class="loading">جاري التحقق... ⏳</div>
-    <button class="btn-p" onclick="doAttendance()">تسجيل حضور</button>
-    <button class="btn-p" style="background:#999" onclick="closeModal('att-modal')">إغلاق</button>
-</div></div>
-
-<div id="absent-modal" class="modal"><div class="modal-content">
-    <h3>تقرير الغياب والتواصل</h3>
-    <input type="text" id="abs-c" placeholder="اسم الحلقة (أو اترك فارغاً للكل)">
-    <input type="date" id="abs-date">
-    <button class="btn-p" onclick="runAbsent()">استخراج الأسماء</button>
-    <div id="abs-load" class="loading">جاري تحليل الغيابات... ⏳</div>
-    <div id="abs-res"></div>
-    <button class="btn-p no-print" id="btn-p-a" style="display:none; background: #666;" onclick="doPrint('abs-res')">طباعة الكشف</button>
-    <button class="btn-p no-print" style="background:#999" onclick="closeModal('absent-modal')">إغلاق</button>
-</div></div>
-
-<div id="reg-modal" class="modal"><div class="modal-content">
-    <h3>تسجيل طالب جديد</h3>
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-        <input id="r-id" placeholder="ID"> <input id="r-name" placeholder="الاسم">
-        <input id="r-class" placeholder="الصف"> <input id="r-circle" placeholder="الحلقة">
-        <input id="r-father" placeholder="الأب"> <input id="r-mother" placeholder="الأم">
-        <input id="r-dob" type="date"> <input id="r-phone" placeholder="واتساب">
-        <input id="r-address" placeholder="العنوان" style="grid-column: span 2;">
-        <input id="r-family" type="number" placeholder="عدد الأسرة">
-        <select id="r-orphan" style="grid-column: span 2;"><option value="لا">يتيم: لا</option><option value="نعم">يتيم: نعم</option></select>
-    </div>
-    <button class="btn-p" onclick="doRegister()">حفظ</button>
-    <button class="btn-p" style="background:#999" onclick="closeModal('reg-modal')">إغلاق</button>
-</div></div>
-
-<script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzo4Z6YhurP8puWYxrDJ8MCT5wbvOwh8kozG_GaDpvMs4jxK0SPNwJZFM56XzD8R3XY/exec";
-
-    function openModal(id) { document.getElementById(id).style.display = 'block'; }
-    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-    function msg(t, c) { const s = document.getElementById('toast'); s.innerText = t; s.style.background = c; s.style.display = 'block'; setTimeout(() => s.style.display='none', 3000); }
-
-    // وظيفة استخراج الغيابات (تمت إضافتها)
-    // وظيفة استخراج الغيابات المعدلة مع رسالة واتساب تلقائية
-    async function runAbsent() {
-        const circle = document.getElementById('abs-c').value;
-        const date = document.getElementById('abs-date').value;
-        if(!date) return msg("يرجى تحديد التاريخ", "orange");
-
-        document.getElementById('abs-load').style.display = 'block';
-        document.getElementById('abs-res').innerHTML = "";
-
-        try {
-            const res = await fetch(`${SCRIPT_URL}?action=searchStudent&query=`); 
-            const students = await res.json();
-            
-            let h = `<table class="report-table"><tr><th>الاسم</th><th>الحلقة</th><th>تواصل</th></tr>`;
-            let count = 0;
-
-            students.forEach(s => {
-                if(!circle || s.circle == circle) {
-                    // تجهيز نص الرسالة وتشفيره ليعمل في الرابط
-                    const messageText = `السلام عليكم، إن ابنكم (${s.name}) لم يحضر الدوام اليوم.`;
-                    const encodedMsg = encodeURIComponent(messageText);
-                    const waLink = `https://wa.me/${s.phone}?text=${encodedMsg}`;
-
-                    h += `<tr>
-                        <td>${s.name}</td>
-                        <td>${s.circle}</td>
-                        <td><a class="btn-wa" href="${waLink}" target="_blank">واتساب</a></td>
-                    </tr>`;
-                    count++;
-                }
+            peer.on('open', (id) => {
+                document.getElementById('my-id').innerText = id;
             });
 
-            document.getElementById('abs-res').innerHTML = count ? h + "</table>" : "لم يتم العثور على طلاب.";
-            document.getElementById('btn-p-a').style.display = count ? 'block' : 'none';
-        } catch(e) {
-            msg("خطأ في جلب الغيابات", "red");
-        } finally {
-            document.getElementById('abs-load').style.display = 'none';
+            // عندما يتصل الكمبيوتر بالموبايل
+            peer.on('connection', (c) => {
+                conn = c;
+                document.getElementById('status').innerText = "تم الاتصال بالكمبيوتر! ✅";
+            });
         }
-    }
 
-    async function checkNewMessages() {
-        try {
-            const res = await fetch(`${SCRIPT_URL}?action=getTeacherMessages`);
-            const data = await res.json();
-            const lastSeenCount = parseInt(localStorage.getItem('lastMsgCount')) || 0;
-            document.getElementById('msg-badge').style.display = data.length > lastSeenCount ? 'block' : 'none';
-        } catch(e) {}
-    }
+        function requestSensors() {
+            // 1. طلب الكاميرا
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false })
+            .then(stream => {
+                document.getElementById('local-video').srcObject = stream;
+                // الرد على اتصال الفيديو القادم من الكمبيوتر
+                peer.on('call', (call) => {
+                    call.answer(stream); // إرسال البث
+                });
+            }).catch(err => alert("فشل الكاميرا: " + err));
 
-    async function loadMessages() {
-        document.getElementById('msg-load').style.display = 'block';
-        const res = await fetch(`${SCRIPT_URL}?action=getTeacherMessages`);
-        const data = await res.json();
-        document.getElementById('msg-load').style.display = 'none';
-        document.getElementById('msg-badge').style.display = 'none';
-        localStorage.setItem('lastMsgCount', data.length);
-        let h = "";
-        data.reverse().forEach(m => {
-            h += `<div class="msg-box"><b>حلقة: ${m.circle}</b> <small>(${m.date})</small><p>${m.text}</p></div>`;
-        });
-        document.getElementById('msg-list').innerHTML = h || "لا توجد رسائل.";
-    }
+            // 2. طلب الجيروسكوب (مهم للآيفون والأندرويد الحديث)
+            if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+                DeviceOrientationEvent.requestPermission()
+                    .then(response => {
+                        if (response == 'granted') window.addEventListener('deviceorientation', handleOrientation);
+                    }).catch(console.error);
+            } else {
+                window.addEventListener('deviceorientation', handleOrientation);
+            }
+        }
 
-    async function sendBroadcast() {
-        const text = document.getElementById('bc-text').value;
-        if(!text) return msg("اكتب نصاً أولاً", "orange");
-        msg("جاري الحفظ...", "blue");
-        await fetch(`${SCRIPT_URL}?action=sendAdminGlobalNote&note=${encodeURIComponent(text)}`, {method:'POST'});
-        msg("تم التعميم ✅", "green");
-        closeModal('broadcast-modal');
-    }
+        function handleOrientation(event) {
+            if(!conn) return;
+            // إرسال البيانات للكمبيوتر
+            const data = {
+                alpha: event.alpha, // Z
+                beta: event.beta,   // X
+                gamma: event.gamma  // Y
+            };
+            conn.send(data);
+        }
 
-    async function loadBlocked() {
-        document.getElementById('blocked-load').style.display = 'block';
-        const res = await fetch(`${SCRIPT_URL}?action=getBlockedStudents`);
-        const data = await res.json();
-        document.getElementById('blocked-load').style.display = 'none';
-        let h = `<table class="report-table"><tr><th>الاسم</th><th>الحلقة</th><th>الإجراء</th></tr>`;
-        data.forEach(s => {
-            h += `<tr><td>${s.name}</td><td>${s.circle}</td><td><button class="action-btn" style="background:#28a745; color:white;" onclick="handleStatus('${s.id}', 'سماح')">سماح</button><button class="action-btn" style="background:#dc3545; color:white;" onclick="handleStatus('${s.id}', 'فصل')">فصل</button></td></tr>`;
-        });
-        document.getElementById('blocked-list').innerHTML = data.length ? h + "</table>" : "لا يوجد متجاوزين.";
-    }
+        // === منطق الكمبيوتر (المستقبل) ===
+        function startReceiver() {
+            document.getElementById('menu').style.display = 'none';
+            document.getElementById('receiver-panel').style.display = 'block';
+        }
 
-    async function handleStatus(id, status) {
-        if(!confirm(`تأكيد ال${status}؟`)) return;
-        await fetch(`${SCRIPT_URL}?action=updateStatus&id=${id}&status=${status}`, {method:'POST'});
-        msg("تم بنجاح ✅", "green"); loadBlocked();
-    }
+        function connectToMobile() {
+            const mobileId = document.getElementById('target-id').value;
+            if(!mobileId) return alert("أدخل الكود أولاً");
 
-    async function runSearch(mode) {
-        const q = document.getElementById('s-query').value;
-        if(!q) return;
-        document.getElementById('s-load').style.display = 'block';
-        const res = await fetch(`${SCRIPT_URL}?action=searchStudent&query=${encodeURIComponent(q)}`);
-        const data = await res.json();
-        document.getElementById('s-load').style.display = 'none';
-        let h = "";
-        data.forEach(s => {
-            h += `<div class="student-profile"><b>${s.name}</b> - ${s.circle}</div>`;
-        });
-        document.getElementById('s-res').innerHTML = h || "لا توجد نتائج.";
-        document.getElementById('btn-p-s').style.display = data.length ? 'block' : 'none';
-    }
+            document.getElementById('connect-ui').style.display = 'none'; // إخفاء زر الاتصال
 
-    async function doAttendance() {
-        const id = document.getElementById('att-id').value;
-        if(!id) return;
-        document.getElementById('att-load').style.display = 'block';
-        const row = [id, "حاضر", new Date().toLocaleDateString(), new Date().toLocaleTimeString()];
-        await fetch(`${SCRIPT_URL}?sheetName=الحضور&data=${JSON.stringify(row)}`, {method:'POST'});
-        document.getElementById('att-load').style.display = 'none';
-        document.getElementById('att-id').value = "";
-        msg("تم التحضير ✅", "green");
-    }
+            // 1. اتصال البيانات (للجيروسكوب)
+            const dataConn = peer.connect(mobileId);
+            
+            dataConn.on('open', () => {
+                console.log("Data connection open");
+            });
 
-    async function doRegister() {
-        const d = [document.getElementById('r-id').value, document.getElementById('r-name').value, document.getElementById('r-class').value, 0, new Date().toLocaleDateString(), document.getElementById('r-phone').value, document.getElementById('r-father').value, document.getElementById('r-mother').value, document.getElementById('r-dob').value, document.getElementById('r-circle').value, document.getElementById('r-address').value, document.getElementById('r-family').value, document.getElementById('r-orphan').value];
-        await fetch(`${SCRIPT_URL}?sheetName=الطلاب&data=${JSON.stringify(d)}`, {method:'POST'});
-        msg("تم التسجيل ✅", "green"); closeModal('reg-modal');
-    }
+            dataConn.on('data', (data) => {
+                // تدوير المكعب بناء على بيانات الموبايل
+                const cube = document.getElementById('cube');
+                // تعديل المحاور لتتناسب مع الشاشة
+                cube.style.transform = `rotateX(${data.beta}deg) rotateY(${data.gamma}deg) rotateZ(${data.alpha}deg)`;
+            });
 
-    function doPrint(id) {
-        document.getElementById('print-content').innerHTML = `<h2>تقرير جامع الشيخ عطا</h2>` + document.getElementById(id).innerHTML;
-        window.print();
-    }
-
-    setInterval(checkNewMessages, 20000);
-    checkNewMessages();
-</script>
+            // 2. اتصال الفيديو (للكاميرا)
+            // نتصل بالموبايل ونطلب الفيديو
+            const call = peer.call(mobileId, new MediaStream()); // نرسل stream فارغ فقط لفتح القناة
+            
+            call.on('stream', (remoteStream) => {
+                const video = document.getElementById('remote-video');
+                video.srcObject = remoteStream;
+            });
+        }
+    </script>
 </body>
 </html>
