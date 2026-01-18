@@ -2,167 +2,407 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام التحكم الفضائي (WebRTC)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NIBRAS SAT - نظام التحكم الفضائي</title>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    
     <style>
-        body { background: #000; color: #0f0; font-family: monospace; text-align: center; overflow: hidden; }
-        h1 { margin: 10px; font-size: 1.2rem; text-shadow: 0 0 10px #0f0; }
-        
-        /* واجهة الاختيار */
-        #menu { display: flex; flex-direction: column; gap: 20px; justify-content: center; height: 100vh; }
-        button { padding: 15px 30px; font-size: 1.2rem; background: #004400; color: #fff; border: 2px solid #0f0; cursor: pointer; border-radius: 10px; }
-        button:hover { background: #0f0; color: #000; }
+        :root {
+            --primary: #00f3ff; /* أزرق نيون */
+            --secondary: #bc13fe; /* بنفسجي نيون */
+            --bg: #050510; /* خلفية داكنة */
+            --glass: rgba(0, 243, 255, 0.1);
+        }
 
-        /* واجهة الموبايل (المرسل) */
-        #sender-panel { display: none; padding: 20px; }
-        .id-box { background: #222; padding: 15px; border: 1px dashed #0f0; margin: 10px; font-size: 1.5rem; user-select: all; }
-        #local-video { width: 50%; border: 1px solid #333; margin-top: 10px; opacity: 0.5; }
+        * { box-sizing: border-box; }
 
-        /* واجهة الكمبيوتر (المستقبل) */
-        #receiver-panel { display: none; height: 100vh; position: relative; }
-        #remote-video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; opacity: 0.6; }
-        
-        /* مشهد الـ 3D */
-        .scene { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 300px; height: 300px; perspective: 1000px; z-index: 10; }
-        .cube { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 0.05s linear; }
-        .face { position: absolute; width: 200px; height: 200px; left: 50px; top: 50px; border: 2px solid #0f0; background: rgba(0, 50, 0, 0.3); display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 2rem; box-shadow: 0 0 20px rgba(0, 255, 0, 0.2); color: #fff; }
-        .front { transform: translateZ(100px); }
-        .back { transform: rotateY(180deg) translateZ(100px); }
-        .right { transform: rotateY(90deg) translateZ(100px); }
-        .left { transform: rotateY(-90deg) translateZ(100px); }
-        .top { transform: rotateX(90deg) translateZ(100px); }
+        body {
+            background-color: var(--bg);
+            color: var(--primary);
+            font-family: 'Share Tech Mono', monospace;
+            margin: 0;
+            height: 100vh;
+            overflow: hidden;
+            background-image: 
+                radial-gradient(circle at 50% 50%, rgba(188, 19, 254, 0.1) 0%, transparent 50%),
+                linear-gradient(0deg, rgba(0,0,0,1) 0%, rgba(5,5,16,1) 100%);
+        }
+
+        /* --- واجهة الترحيب --- */
+        #landing-page {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            text-align: center;
+            z-index: 100;
+            position: relative;
+        }
+
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            text-shadow: 0 0 20px var(--primary);
+            margin-bottom: 40px;
+            letter-spacing: 2px;
+        }
+
+        .btn-main {
+            background: rgba(0,0,0,0.5);
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            padding: 20px 40px;
+            font-size: 1.2rem;
+            margin: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: all 0.3s;
+            font-family: 'Orbitron', sans-serif;
+            text-transform: uppercase;
+            box-shadow: 0 0 15px var(--glass);
+            width: 300px;
+        }
+
+        .btn-main:hover {
+            background: var(--primary);
+            color: #000;
+            box-shadow: 0 0 30px var(--primary);
+            transform: scale(1.05);
+        }
+
+        /* --- واجهة الموبايل (المرسل) --- */
+        #mobile-ui {
+            display: none;
+            padding: 20px;
+            text-align: center;
+            height: 100vh;
+        }
+
+        .id-display {
+            background: rgba(0,0,0,0.8);
+            border: 1px dashed var(--secondary);
+            padding: 20px;
+            margin: 20px auto;
+            font-size: 1.5rem;
+            color: #fff;
+            border-radius: 10px;
+            word-break: break-all;
+            user-select: all;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            background: #333;
+            color: #aaa;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+
+        .status-badge.connected {
+            background: var(--primary);
+            color: #000;
+            box-shadow: 0 0 10px var(--primary);
+        }
+
+        #local-video {
+            width: 80%;
+            max-width: 300px;
+            border: 2px solid var(--secondary);
+            border-radius: 10px;
+            margin-top: 20px;
+            opacity: 0.7;
+        }
+
+        /* --- واجهة الكمبيوتر (المستقبل) --- */
+        #pc-ui {
+            display: none;
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        /* فيديو الخلفية (من الموبايل) */
+        #remote-video {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            object-fit: cover;
+            z-index: 1;
+            opacity: 0.4; /* شفافية لظهور المجسم */
+            filter: contrast(1.2) brightness(0.8) hue-rotate(180deg); /* تأثير سينمائي */
+        }
+
+        /* شاشة البيانات HUD */
+        .hud-overlay {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 10;
+            pointer-events: none; /* للسماح بالنقر خلفها */
+            background: linear-gradient(0deg, rgba(0,0,0,0.8) 0%, transparent 20%, transparent 80%, rgba(0,0,0,0.8) 100%);
+        }
+
+        /* نافذة الاتصال في الكمبيوتر */
+        #connect-box {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.9);
+            border: 2px solid var(--primary);
+            padding: 40px;
+            z-index: 20;
+            text-align: center;
+            border-radius: 10px;
+            box-shadow: 0 0 50px rgba(0, 243, 255, 0.2);
+        }
+
+        input {
+            background: #111;
+            border: 1px solid #333;
+            color: #fff;
+            padding: 10px;
+            font-size: 1.2rem;
+            width: 100%;
+            margin-bottom: 20px;
+            font-family: monospace;
+            text-align: center;
+        }
+
+        /* --- المشهد ثلاثي الأبعاد --- */
+        .scene {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px; height: 300px;
+            perspective: 1000px;
+            z-index: 15;
+        }
+
+        .satellite-model {
+            width: 100%; height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.1s linear; /* حركة ناعمة */
+        }
+
+        .face {
+            position: absolute;
+            width: 200px; height: 200px;
+            left: 50px; top: 50px;
+            border: 2px solid var(--primary);
+            background: rgba(0, 243, 255, 0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5rem;
+            box-shadow: inset 0 0 20px var(--glass);
+            backface-visibility: visible;
+        }
+
+        /* تفاصيل الأوجه */
+        .front  { transform: translateZ(100px); border-color: #fff; }
+        .back   { transform: rotateY(180deg) translateZ(100px); }
+        .right  { transform: rotateY(90deg) translateZ(100px); background: rgba(188, 19, 254, 0.2); }
+        .left   { transform: rotateY(-90deg) translateZ(100px); background: rgba(188, 19, 254, 0.2); }
+        .top    { transform: rotateX(90deg) translateZ(100px); }
         .bottom { transform: rotateX(-90deg) translateZ(100px); }
 
-        input { padding: 10px; font-size: 1.2rem; text-align: center; width: 200px; }
-        .overlay-ui { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); z-index: 20; background: rgba(0,0,0,0.8); padding: 10px; border-radius: 10px; }
+        /* البيانات الرقمية */
+        .telemetry-data {
+            position: absolute;
+            bottom: 20px; left: 20px;
+            text-align: left;
+            font-size: 1.2rem;
+            color: var(--primary);
+            z-index: 20;
+        }
     </style>
 </head>
 <body>
 
-    <div id="menu">
-        <h1>اختر وضع التشغيل</h1>
-        <button onclick="startSender()">📱 أنا الموبايل (القمر الصناعي)</button>
-        <button onclick="startReceiver()">💻 أنا الكمبيوتر (المحطة الأرضية)</button>
+    <div id="landing-page">
+        <h1>NIBRAS SAT<br><span style="font-size: 1rem; color:var(--secondary)">MISSION CONTROL SYSTEM</span></h1>
+        <button class="btn-main" onclick="initMobile()">📱 وضع القمر الصناعي<br><small>(للجوال)</small></button>
+        <button class="btn-main" onclick="initPC()">💻 وضع المحطة الأرضية<br><small>(للكمبيوتر)</small></button>
     </div>
 
-    <div id="sender-panel">
-        <h2>وضع الإرسال</h2>
-        <p>انسخ هذا الكود وضعه في الكمبيوتر:</p>
-        <div class="id-box" id="my-id">جاري التوليد...</div>
-        <p id="status">بانتظار الإذن...</p>
-        <video id="local-video" autoplay muted playsinline></video>
-        <br><br>
-        <button onclick="requestSensors()">تفعيل الحساسات والكاميرا 🚀</button>
+    <div id="mobile-ui">
+        <h2 style="color:var(--secondary)">وحدة الإرسال</h2>
+        <div class="status-badge" id="mobile-status">غير متصل</div>
+        
+        <p>انسخ هذا المعرف وأدخله في الكمبيوتر:</p>
+        <div class="id-display" id="my-peer-id" onclick="copyId()">جاري التوليد...</div>
+        
+        <button class="btn-main" onclick="startMission()">🚀 بدء المهمة وتشغيل الحساسات</button>
+        
+        <video id="local-video" muted autoplay playsinline></video>
+        <p style="font-size: 0.8rem; color: #666;">اضغط على المعرف لنسخه</p>
     </div>
 
-    <div id="receiver-panel">
+    <div id="pc-ui">
         <video id="remote-video" autoplay playsinline></video>
         
-        <div class="overlay-ui" id="connect-ui">
-            <input type="text" id="target-id" placeholder="أدخل كود الموبايل هنا">
-            <button onclick="connectToMobile()">اتصال</button>
+        <div class="hud-overlay">
+            <div class="telemetry-data" id="telemetry">
+                WAITING FOR SIGNAL...
+            </div>
+        </div>
+
+        <div id="connect-box">
+            <h2 style="color:var(--primary)">إعداد الاتصال</h2>
+            <input type="text" id="remote-id-input" placeholder="أدخل معرف الجوال هنا">
+            <button class="btn-main" onclick="connectToSatellite()">اتصال بالقمر</button>
         </div>
 
         <div class="scene">
-            <div class="cube" id="cube">
+            <div class="satellite-model" id="sat-model">
                 <div class="face front">CAM</div>
-                <div class="face back">BACK</div>
-                <div class="face right">R</div>
-                <div class="face left">L</div>
-                <div class="face top">TOP</div>
-                <div class="face bottom">BTM</div>
+                <div class="face back">ENG</div>
+                <div class="face right">SOLAR</div>
+                <div class="face left">SOLAR</div>
+                <div class="face top">ANT</div>
+                <div class="face bottom">SENS</div>
             </div>
         </div>
     </div>
 
     <script>
-        const peer = new Peer(); // إنشاء هوية عشوائية
+        // إعدادات اتصال محسنة لتجنب الحجب
+        const peerConfig = {
+            debug: 2,
+            config: {
+                'iceServers': [
+                    { url: 'stun:stun1.l.google.com:19302' },
+                    { url: 'stun:stun2.l.google.com:19302' }
+                ]
+            }
+        };
+
+        let peer = null;
         let conn = null;
-        
-        // === منطق الموبايل (المرسل) ===
-        function startSender() {
-            document.getElementById('menu').style.display = 'none';
-            document.getElementById('sender-panel').style.display = 'block';
+
+        // === دوال الجوال (المرسل) ===
+        function initMobile() {
+            document.getElementById('landing-page').style.display = 'none';
+            document.getElementById('mobile-ui').style.display = 'block';
+
+            peer = new Peer(null, peerConfig);
 
             peer.on('open', (id) => {
-                document.getElementById('my-id').innerText = id;
+                document.getElementById('my-peer-id').innerText = id;
+                document.getElementById('my-peer-id').style.borderColor = "var(--primary)";
             });
 
-            // عندما يتصل الكمبيوتر بالموبايل
+            peer.on('error', (err) => {
+                alert("خطأ في الاتصال بالسيرفر: " + err.type);
+            });
+
             peer.on('connection', (c) => {
                 conn = c;
-                document.getElementById('status').innerText = "تم الاتصال بالكمبيوتر! ✅";
+                document.getElementById('mobile-status').innerText = "تم الاتصال بالمحطة الأرضية";
+                document.getElementById('mobile-status').classList.add('connected');
             });
         }
 
-        function requestSensors() {
-            // 1. طلب الكاميرا
+        function startMission() {
+            // 1. تشغيل الكاميرا
             navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false })
             .then(stream => {
                 document.getElementById('local-video').srcObject = stream;
-                // الرد على اتصال الفيديو القادم من الكمبيوتر
+                // الرد على اتصال الفيديو القادم
                 peer.on('call', (call) => {
-                    call.answer(stream); // إرسال البث
+                    call.answer(stream);
                 });
-            }).catch(err => alert("فشل الكاميرا: " + err));
+            })
+            .catch(err => alert("تأكد من استخدام HTTPS لتشغيل الكاميرا! \n" + err));
 
-            // 2. طلب الجيروسكوب (مهم للآيفون والأندرويد الحديث)
-            if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+            // 2. تشغيل الحساسات
+            if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
                 DeviceOrientationEvent.requestPermission()
                     .then(response => {
                         if (response == 'granted') window.addEventListener('deviceorientation', handleOrientation);
-                    }).catch(console.error);
+                        else alert("تم رفض إذن الحساسات");
+                    })
+                    .catch(console.error);
             } else {
                 window.addEventListener('deviceorientation', handleOrientation);
             }
         }
 
         function handleOrientation(event) {
-            if(!conn) return;
-            // إرسال البيانات للكمبيوتر
-            const data = {
-                alpha: event.alpha, // Z
-                beta: event.beta,   // X
-                gamma: event.gamma  // Y
-            };
-            conn.send(data);
+            if (!conn) return;
+            // إرسال البيانات
+            conn.send({
+                alpha: event.alpha, // بوصلة
+                beta: event.beta,   // أمام/خلف
+                gamma: event.gamma  // يمين/يسار
+            });
         }
 
-        // === منطق الكمبيوتر (المستقبل) ===
-        function startReceiver() {
-            document.getElementById('menu').style.display = 'none';
-            document.getElementById('receiver-panel').style.display = 'block';
+        function copyId() {
+            const text = document.getElementById('my-peer-id').innerText;
+            navigator.clipboard.writeText(text);
+            alert("تم نسخ المعرف: " + text);
         }
 
-        function connectToMobile() {
-            const mobileId = document.getElementById('target-id').value;
-            if(!mobileId) return alert("أدخل الكود أولاً");
+        // === دوال الكمبيوتر (المستقبل) ===
+        function initPC() {
+            document.getElementById('landing-page').style.display = 'none';
+            document.getElementById('pc-ui').style.display = 'block';
+            peer = new Peer(null, peerConfig);
+        }
 
-            document.getElementById('connect-ui').style.display = 'none'; // إخفاء زر الاتصال
+        function connectToSatellite() {
+            const remoteId = document.getElementById('remote-id-input').value;
+            if (!remoteId) return alert("الرجاء إدخال المعرف");
 
-            // 1. اتصال البيانات (للجيروسكوب)
-            const dataConn = peer.connect(mobileId);
+            document.getElementById('connect-box').style.display = 'none';
+
+            // 1. اتصال البيانات
+            const dataConn = peer.connect(remoteId);
             
             dataConn.on('open', () => {
-                console.log("Data connection open");
+                console.log("Connected to Mobile Data");
             });
 
             dataConn.on('data', (data) => {
-                // تدوير المكعب بناء على بيانات الموبايل
-                const cube = document.getElementById('cube');
-                // تعديل المحاور لتتناسب مع الشاشة
-                cube.style.transform = `rotateX(${data.beta}deg) rotateY(${data.gamma}deg) rotateZ(${data.alpha}deg)`;
+                updateSatelliteModel(data);
+                updateTelemetry(data);
             });
 
-            // 2. اتصال الفيديو (للكاميرا)
-            // نتصل بالموبايل ونطلب الفيديو
-            const call = peer.call(mobileId, new MediaStream()); // نرسل stream فارغ فقط لفتح القناة
-            
+            // 2. اتصال الفيديو
+            const call = peer.call(remoteId, new MediaStream()); // إرسال فارغ لفتح الخط
             call.on('stream', (remoteStream) => {
                 const video = document.getElementById('remote-video');
                 video.srcObject = remoteStream;
             });
+            call.on('error', (err) => alert("فشل الفيديو: " + err));
+        }
+
+        function updateSatelliteModel(data) {
+            const model = document.getElementById('sat-model');
+            // تحويل حركة الموبايل لحركة CSS
+            // Beta = Rotate X
+            // Gamma = Rotate Y
+            // Alpha = Rotate Z
+            model.style.transform = `rotateX(${data.beta}deg) rotateY(${data.gamma}deg) rotateZ(${data.alpha}deg)`;
+        }
+
+        function updateTelemetry(data) {
+            const hud = document.getElementById('telemetry');
+            hud.innerHTML = `
+                STATUS: LINK ESTABLISHED <span style="color:var(--primary)">●</span><br>
+                -------------------------<br>
+                PITCH (X): ${Math.round(data.beta)}°<br>
+                ROLL  (Y): ${Math.round(data.gamma)}°<br>
+                YAW   (Z): ${Math.round(data.alpha)}°<br>
+                -------------------------<br>
+                VIDEO SIGNAL: STRONG
+            `;
         }
     </script>
 </body>
